@@ -5,10 +5,12 @@
  */
 package api;
 
+import system.Task;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.concurrent.atomic.AtomicInteger;
+import system.Configuration;
+import system.SpaceImpl;
 
 /**
  *
@@ -17,7 +19,7 @@ import java.util.concurrent.atomic.AtomicInteger;
  */
 public abstract class TaskCompose<I> extends Task
 {
-    private AtomicInteger numUnsetArgs;
+    private int numUnsetArgs;
     private List<I> args;
     private long decomposeTaskRunTime;
     private long sumChildT1;
@@ -26,31 +28,49 @@ public abstract class TaskCompose<I> extends Task
     @Override
     abstract public ReturnValue call();
     
-    public List<I> args() { return args; }
+    /**
+     *
+     * @return the List of inputs.
+     */
+    synchronized public List<I> args() { return args; }
     
-    public void arg( final int argNum, final I argValue ) 
+    /**
+     * Set one of this task's inputs.
+     * @param argNum the index of this input.
+     * @param argValue the value of this input.
+     * @param space if this is the last input this task is waiting for, put
+     * the task in the space's ready task queue; remove it from the waiting task map.
+     */
+    synchronized public void arg( final int argNum, final I argValue, SpaceImpl space ) 
     { 
-        assert numUnsetArgs.get() > 0 && ! isReady() && args.get( argNum ) == null; 
+        assert numUnsetArgs > 0 &&  argValue != null && args.get( argNum ) == null; 
         args.set( argNum, argValue );
-        numUnsetArgs.getAndDecrement();
-        assert args.get( argNum ) == argValue;
+        if ( --numUnsetArgs == 0 )
+        {
+            if ( Configuration.SPACE_CALLABLE )
+            {
+                space.processResult( this, this.call() ); // assumes TaskCompose is SPACE_CALLABLE.
+            }
+            else
+            {
+                space.putReadyTask( this );
+            }
+            space.removeWaitingTask( id() );
+        }
     }
     
-    public void numArgs( int numArgs )
+    synchronized public void numArgs( int numArgs )
     {
         assert numArgs >= 0;
-        numUnsetArgs = new AtomicInteger( numArgs );
+        numUnsetArgs = numArgs;
         args = Collections.synchronizedList( new ArrayList<>( numArgs ) ) ;
         for ( int i = 0; i < numArgs; i++ )
         {
             args.add( null );
-            assert args.get( i ) == null;
         }
         assert args.size() == numArgs;
     }
-    
-    public boolean isReady() { return numUnsetArgs.get() == 0; }
-    
+        
     public void decomposeTaskRunTime( long time ) { decomposeTaskRunTime = time; }
     public long decomposeTaskRunTime() { return decomposeTaskRunTime; }
     

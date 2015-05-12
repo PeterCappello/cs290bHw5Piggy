@@ -24,7 +24,7 @@
 package clients;
 
 import api.Shared;
-import api.Task;
+import system.Task;
 import applications.euclideantsp.SharedMinDouble;
 import java.awt.Color;
 import java.awt.Graphics;

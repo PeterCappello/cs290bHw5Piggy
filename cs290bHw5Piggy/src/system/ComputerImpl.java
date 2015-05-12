@@ -26,14 +26,10 @@ import api.*;
 import java.rmi.Naming;
 import java.rmi.RemoteException;
 import java.rmi.server.UnicastRemoteObject;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
-import java.util.concurrent.atomic.AtomicInteger;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import static system.Configuration.MULTI_COMPUTERS;
 
 /**
  * An implementation of the Remote Computer interface.
@@ -41,22 +37,15 @@ import static system.Configuration.MULTI_COMPUTERS;
  */
 public class ComputerImpl extends UnicastRemoteObject implements Computer
 {
-    static final private int FACTOR = 2;
-           final private SpaceProxy spaceProxy;
-           final private List<Worker> workerList = new ArrayList<>();
-           final private AtomicInteger numTasks = new AtomicInteger();
-           //!! delete sharedLock & test to ensure its OK.
-           final private Boolean sharedLock = true;
-                 private Shared shared;
+    final private SpaceProxy spaceProxy;
+    //!! delete sharedLock & test to ensure its OK.
+    final private Boolean sharedLock = true;
+          private Shared shared;
            
-    public ComputerImpl( Computer2Space space ) throws RemoteException
+    public ComputerImpl( Space space ) throws RemoteException
     {
-        final int numWorkers = MULTI_COMPUTERS ? FACTOR * Runtime.getRuntime().availableProcessors() : 1;
-        for ( int workerNum = 0; workerNum < numWorkers; workerNum++ )
-        {
-            workerList.add( new WorkerImpl() );
-        }
-        Logger.getLogger( this.getClass().getCanonicalName() ).log( Level.INFO, "Workers: {0}", numWorkers );
+        Logger.getLogger( this.getClass().getCanonicalName() )
+              .log(Level.INFO, "Computer: started with {0} available processors.", Runtime.getRuntime().availableProcessors() );
         spaceProxy = new SpaceProxy( space );
         spaceProxy.start();
     }
@@ -70,39 +59,21 @@ public class ComputerImpl extends UnicastRemoteObject implements Computer
     @Override
     public Return execute( Task task ) throws RemoteException 
     { 
-        numTasks.getAndIncrement();
         final long startTime = System.nanoTime();
         task.computer( this );
         final Return returnValue = task.call();
         final long runTime = ( System.nanoTime() - startTime ); // milliseconds
-        returnValue.taskRunTime( runTime );
-//        System.out.println("ComputerImpl.exeute: Task id: " + task.id() + " elapsed time: " + runTime);
-       
+        returnValue.taskRunTime( runTime );       
         return returnValue;
     }
     
     public static void main( String[] args ) throws Exception
     {
         System.setSecurityManager( new SecurityManager() );
-        /**
-         * Its main method gets the domain name of its Space's machine from the command line. 
-         */
-        final String domainName = "localhost";
+        final String domainName = args.length == 0 ? "localhost" : args[ 0 ];
         final String url = "rmi://" + domainName + ":" + Space.PORT + "/" + Space.SERVICE_NAME;
-        final Computer2Space space = (Computer2Space) Naming.lookup( url );
-        ComputerImpl computer = new ComputerImpl( space );
-        space.registerExternalComputer( computer, computer.workerList() );
-        Logger.getLogger( ComputerImpl.class.getCanonicalName() ).log( Level.WARNING, "Computer running." );
-    }
-
-    /**
-     * Terminate the JVM.
-     * @throws RemoteException - always!
-     */
-    @Override
-    public void exit() throws RemoteException 
-    { 
-        System.out.println("Computer # tasks complete:" + numTasks ); /*System.exit( 0 ); */ 
+        final Space space = (Space) Naming.lookup( url );
+        space.register( new ComputerImpl( space ), Runtime.getRuntime().availableProcessors() );
     }
         
     public Shared shared() { synchronized ( sharedLock ) { return shared; } }
@@ -115,8 +86,6 @@ public class ComputerImpl extends UnicastRemoteObject implements Computer
         }
     }
     
-    public List<Worker> workerList() { return workerList; }
-
     @Override
     public void downShared( Shared that ) 
     { 
@@ -130,21 +99,12 @@ public class ComputerImpl extends UnicastRemoteObject implements Computer
         }
     }
     
-    private class WorkerImpl implements Worker
-    {
-        @Override
-        public Return execute( Task task ) throws RemoteException 
-        {
-            return ComputerImpl.this.execute( task );
-        }
-    }
-    
     private class SpaceProxy extends Thread
     {
-        final private Computer2Space space;
+        final private Space space;
         final private BlockingQueue<Boolean> upSharedQ = new LinkedBlockingQueue<>(); 
         
-        SpaceProxy( Computer2Space space ) { this.space = space; }
+        SpaceProxy( Space space ) { this.space = space; }
         
         @Override
         public void run()

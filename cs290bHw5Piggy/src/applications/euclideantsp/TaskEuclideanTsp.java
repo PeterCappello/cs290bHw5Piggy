@@ -23,9 +23,9 @@
  */
 package applications.euclideantsp;
 
-import api.ReturnSubtasks;
+import api.ReturnDecomposition;
 import api.ReturnValue;
-import api.Task;
+import system.Task;
 import api.TaskRecursive;
 import clients.ClientEuclideanTsp;
 import java.util.ArrayList;
@@ -106,14 +106,14 @@ public class TaskEuclideanTsp extends TaskRecursive<TaskEuclideanTsp>
     }
 
     @Override
-    public ReturnSubtasks decompose() 
+    public ReturnDecomposition divideAndConquer() 
     {
         final List<Task> children = new  LinkedList<>();
         for ( Integer city : unvisitedCities )
         {
             children.add( new TaskEuclideanTsp( this, city ) );
         }
-        return new ReturnSubtasks( new MinTour(), children );
+        return new ReturnDecomposition( new MinTour(), children );
     }
     
     public LowerBound lowerBound() { return lowerBound; }

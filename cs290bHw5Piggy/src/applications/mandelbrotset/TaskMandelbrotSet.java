@@ -22,9 +22,9 @@
  * THE SOFTWARE.
  */
 package applications.mandelbrotset;
-import api.ReturnSubtasks;
+import api.ReturnDecomposition;
 import api.ReturnValue;
-import api.Task;
+import system.Task;
 import api.TaskRecursive;
 import static clients.ClientMandelbrotSet.BLOCK_SIZE;
 import static clients.ClientMandelbrotSet.EDGE_LENGTH;
@@ -79,7 +79,7 @@ public class TaskMandelbrotSet extends TaskRecursive<IterationCounts>
     }
 
     @Override
-    public ReturnSubtasks decompose() 
+    public ReturnDecomposition divideAndConquer() 
     {
         final List<Task> subtasks = new  LinkedList<>();
         final int numBlocks = N_PIXELS / BLOCK_SIZE;
@@ -94,7 +94,7 @@ public class TaskMandelbrotSet extends TaskRecursive<IterationCounts>
                 subtasks.add( task );
             }
         }
-        return new ReturnSubtasks( new AddBlocks(), subtasks );
+        return new ReturnDecomposition( new AddBlocks(), subtasks );
     }
     
     @Override

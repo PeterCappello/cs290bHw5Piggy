@@ -23,7 +23,7 @@
  */
 package clients;
 
-import api.Task;
+import system.Task;
 import applications.fibonacci.TaskFibonacci;
 import java.rmi.RemoteException;
 import javax.swing.JLabel;

@@ -23,10 +23,9 @@
  */
 package system;
 
-import api.Computer;
+import api.ReturnValue;
 import api.Shared;
 import api.Space;
-import api.Task;
 import api.TaskCompose;
 import java.rmi.RemoteException;
 import java.rmi.registry.LocateRegistry;
@@ -46,7 +45,7 @@ import static system.Configuration.SPACE_CALLABLE;
  * SpaceImpl implements the space for coordinating sending/receiving Task and Result objects.
  * @author Peter Cappello
  */
-public final class SpaceImpl extends UnicastRemoteObject implements Space, Computer2Space
+public final class SpaceImpl extends UnicastRemoteObject implements Space
 {
     static final public int FINAL_RETURN_VALUE = -1;
     static final private AtomicInteger computerIds = new AtomicInteger();
@@ -68,7 +67,7 @@ public final class SpaceImpl extends UnicastRemoteObject implements Space, Compu
         if ( SPACE_CALLABLE )
         {
             ComputerImpl computerInternal = new ComputerImpl( this );
-            registerInternalComputer( computerInternal, computerInternal.workerList() );
+            registerInternalComputer( computerInternal, Runtime.getRuntime().availableProcessors() );
         }
     }
     
@@ -128,7 +127,7 @@ public final class SpaceImpl extends UnicastRemoteObject implements Space, Compu
      * @return a Return object.
      */
     @Override
-    public Return take() 
+    public ReturnValue take() 
     {
         try { return resultQ.take(); } 
         catch ( InterruptedException exception ) 
@@ -139,13 +138,6 @@ public final class SpaceImpl extends UnicastRemoteObject implements Space, Compu
         return null;
     }
 
-    @Override
-    public void exit() throws RemoteException 
-    {
-        computerProxies.values().forEach( proxy -> proxy.exit() );
-        System.exit( 0 );
-    }
-
     /**
      * Register Computer with Space.  
      * Will override existing key-value pair, if any.
@@ -153,21 +145,29 @@ public final class SpaceImpl extends UnicastRemoteObject implements Space, Compu
      * @param workerList
      * @throws RemoteException
      */
-    @Override
-    public void registerExternalComputer( Computer computer, List<Worker> workerList ) throws RemoteException
-    {
-        final ComputerProxy computerProxy = new ComputerProxy( computer, workerList, readyTaskQ );
-        register( computer, computerProxy );
-    }
+//    @Override
+//    public void registerExternalComputer( Computer computer, List<Worker> workerList ) throws RemoteException
+//    {
+//        final ComputerProxy computerProxy = new ComputerProxy( computer, workerList, readyTaskQ );
+//        register( computer, computerProxy );
+//    }
     
-    public void registerInternalComputer( Computer computer, List<Worker> workerList ) throws RemoteException
-    {
-        final ComputerProxy computerProxy = new ComputerProxy( computer, workerList, readySpaceCallableTaskQ );
-        register( computer, computerProxy );
-    }
+//    public void registerInternalComputer( Computer computer, List<Worker> workerList ) throws RemoteException
+//    {
+//        final ComputerProxy computerProxy = new ComputerProxy( computer, workerList, readySpaceCallableTaskQ );
+//        register( computer, computerProxy );
+//    }
     
+    /**
+     * Register Computer with Space.  
+     * Will override existing key-value pair, if any.
+     * @param computer
+     * @param workerList
+     * @throws RemoteException
+     */
     private void register( Computer computer, ComputerProxy computerProxy )
     {
+        final ComputerProxy computerProxy = new ComputerProxy( computer, numProxies, readyTaskQ );
         computerProxies.put( computer, computerProxy );
         computerProxy.start();
         computerProxy.startWorkerProxies();
@@ -202,14 +202,14 @@ public final class SpaceImpl extends UnicastRemoteObject implements Space, Compu
     public void putReadyTask( Task task ) 
     { 
         assert waitingTaskMap.get( task.composeId() ) != null || task.composeId() == FINAL_RETURN_VALUE : task.composeId();
-        if ( SPACE_CALLABLE && task.isSpaceCallable() )
-        {
-            try { readySpaceCallableTaskQ.put( task ); } catch ( InterruptedException ignore ){} 
-        }
-        else
-        {
-            try { readyTaskQ.put( task ); } catch ( InterruptedException ignore ){} 
-        }
+//        if ( SPACE_CALLABLE && task.isSpaceCallable() )
+//        {
+//            try { readySpaceCallableTaskQ.put( task ); } catch ( InterruptedException ignore ){} 
+//        }
+//        else
+//        {
+            readyTaskQ.add( task ); 
+//        }
     }
     
     public void removeWaitingTask( int composeId )
@@ -259,22 +259,20 @@ public final class SpaceImpl extends UnicastRemoteObject implements Space, Compu
                 .log(Level.INFO, "\n\tTotal tasks: {0} \n\tT_1: {1}ms.\n\tT_inf: {2}ms.", new Object[]{numTasks, result.t1() / 1000000, result.tInf() / 1000000});
     }
     
-    private class ComputerProxy extends Thread implements Computer 
+    private class ComputerProxy extends Thread
     {
         final private Computer computer;
         final private int computerId = computerIds.getAndIncrement();
-        final private Map<Worker, WorkerProxy> workerMap = new HashMap<>();
+        final private Map<Integer, WorkerProxy> workerMap = new HashMap<>();
         final private BlockingQueue<Boolean> downSharedQ = new LinkedBlockingQueue<>();
-        final private BlockingQueue<Task> readyTaskQ;
 
-        ComputerProxy( Computer computer, List<Worker> workerList, BlockingQueue<Task> readyTaskQ )
+        ComputerProxy( Computer computer, int numWorkerProxies )
         { 
             this.computer = computer;
-            this.readyTaskQ = readyTaskQ;
-            for ( Worker worker : workerList )
+            for ( int id = 0; id < numWorkerProxies; id++ )
             {
-                WorkerProxy workerProxy = new WorkerProxy( worker );
-                workerMap.put( worker, workerProxy );
+                WorkerProxy workerProxy = new WorkerProxy( id );
+                workerMap.put( id, workerProxy );
             }
         }
         
@@ -285,33 +283,19 @@ public final class SpaceImpl extends UnicastRemoteObject implements Space, Compu
                 workerProxy.start();
             }
         }
-
-        @Override
-        public Return execute( Task task ) throws RemoteException
-        { 
-            return computer.execute( task );
-        }
         
-        private void unregister( Task task, Computer computer, Worker worker )
+        private void unregister( Task task, Computer computer, int workerProxyId )
         {
             readyTaskQ.add( task );
-            workerMap.remove( worker );
+            workerMap.remove( workerProxyId );
             Logger.getLogger( this.getClass().getName() )
-                  .log( Level.WARNING, "Computer {0}: Worker failed.", computerId );
+                  .log( Level.WARNING, "Computer {0}: Worker failed.", workerProxyId );
             if ( workerMap.isEmpty() )
             {
                 computerProxies.remove( computer );
                 Logger.getLogger( ComputerProxy.class.getCanonicalName() )
                       .log( Level.WARNING, "Computer {0} failed.", computerId );
-                interrupt();
             }
-        }
-        
-        @Override
-        public void exit() 
-        { 
-            try { computer.exit(); } 
-            catch ( RemoteException ignore ) {} 
         }
         
         @Override
@@ -356,11 +340,11 @@ public final class SpaceImpl extends UnicastRemoteObject implements Space, Compu
             }
         }
      
-        private class WorkerProxy extends Thread implements Worker
+        private class WorkerProxy extends Thread
         {
-            final private Worker worker;
+            final private Integer id;
             
-            private WorkerProxy( Worker worker ) { this.worker = worker; }
+            private WorkerProxy( int id ) { this.id = id; }
             
             @Override
             public void run()
@@ -376,13 +360,14 @@ public final class SpaceImpl extends UnicastRemoteObject implements Space, Compu
                     Task task = null;
                     try 
                     { 
-                        task = ComputerProxy.this.readyTaskQ.take();
-                        processResult( task, execute( task ) );
+                        task = readyTaskQ.take();
+                        processResult( task, computer.execute( task ) );
                     }
                     catch ( RemoteException ignore )
                     {
-                        unregister( task, computer, worker );
-                        break;
+                        unregister( task, computer, id );
+                        ignore.printStackTrace();
+                        return;
                     } 
                     catch ( InterruptedException ex ) 
                     { 
@@ -390,13 +375,7 @@ public final class SpaceImpl extends UnicastRemoteObject implements Space, Compu
                               .log( Level.INFO, null, ex ); 
                     }
                 }
-            }
-            
-            @Override
-            public Return execute( Task task ) throws RemoteException 
-            {
-                return worker.execute( task );
-            }     
+            }   
         }
     }
 }

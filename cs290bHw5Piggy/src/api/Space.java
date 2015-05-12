@@ -23,9 +23,12 @@
  */
 package api;
 
+import system.Task;
 import system.Return;
 import java.rmi.Remote;
 import java.rmi.RemoteException;
+import java.util.List;
+import system.Computer;
 
 /**
  *
@@ -33,21 +36,54 @@ import java.rmi.RemoteException;
  */
 public interface Space extends Remote 
 {
+    /**
+     * The port used by the RMI registry.
+     */
     public static int PORT = 8001;
+
+    /**
+     * The service name associated with this Remote interface.
+     */
     public static String SERVICE_NAME = "Space";
 
-    Return compute( Task task ) throws RemoteException;
+    /**
+     *
+     * @param task to be computed.
+     * @return the task's execute method return value.
+     * @throws RemoteException
+     */
+    ReturnValue compute( final Task task ) throws RemoteException;
     
-    Return compute( Task task, Shared shared ) throws RemoteException;
+    ReturnValue compute( Task task, Shared shared ) throws RemoteException;
     
     /**
      *
-     * @param task 
+     * @param task
      * @throws RemoteException
      */
-    void call( Task task ) throws RemoteException;
+    void execute( final Task task ) throws RemoteException;
+    
+    /**
+     *
+     * @param taskList
+     * @throws RemoteException
+     */
+    void putAll ( final List<Task> taskList ) throws RemoteException;
+    
+    /**
+     *
+     * @param computer
+     * @param numWorkerProxies
+     * @throws RemoteException
+     */
+    void register( final Computer computer, int numWorkerProxies ) throws RemoteException;
 
-    Return take() throws RemoteException;
-
-    void exit() throws RemoteException;
+    /**
+     *
+     * @return
+     * @throws RemoteException
+     */
+    ReturnValue take() throws RemoteException;  
+    
+    void upShared( Shared shared ) throws RemoteException;
 }

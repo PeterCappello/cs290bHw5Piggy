@@ -22,7 +22,7 @@
  * THE SOFTWARE.
  */
 package api;
-
+import system.Task;
 import system.Return;
 
 /**
@@ -32,12 +32,29 @@ import system.Return;
  */
 abstract public class TaskRecursive<T> extends Task
 {    
+    /**
+     * If this task does not decompose, return a ReturnValue object, 
+     * otherwise return a ReturnDecomposition object.
+     * @return Either a ReturnValue object of a ReturnDecomposition object.
+     */
     @Override
-    public Return call() { return isAtomic() ? solve() : decompose(); }
+    public Return call() { return isAtomic() ? solve() : divideAndConquer(); }
     
+    /**
+     *
+     * @return true if and only if this task does not decompose.
+     */
     abstract public boolean isAtomic();
     
+    /**
+     *
+     * @return the ReturnValue object.
+     */
     abstract public ReturnValue<T> solve();
     
-    abstract public ReturnSubtasks decompose();
+    /**
+     *
+     * @return the ReturnDecomposition object.
+     */
+    abstract public ReturnDecomposition divideAndConquer();
 }

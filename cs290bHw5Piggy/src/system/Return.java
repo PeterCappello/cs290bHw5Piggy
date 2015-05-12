@@ -23,7 +23,6 @@
  */
 package system;
 
-import api.Task;
 import java.io.Serializable;
 
 /**
@@ -58,6 +57,8 @@ abstract public class Return implements Serializable
         StringBuilder stringBuilder = new StringBuilder();
         stringBuilder.append( getClass() );
         stringBuilder.append( "\n\tExecution time:\t" ).append( taskRunTime );
+        stringBuilder.append( "\n\tT1 time:\t" ).append( t1 );
+        stringBuilder.append( "\n\tTInf time:\t" ).append( tInf );
         return stringBuilder.toString();
     }
 }

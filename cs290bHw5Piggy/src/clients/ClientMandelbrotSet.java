@@ -22,7 +22,7 @@
  * THE SOFTWARE.
  */
 package clients;
-import api.Task;
+import system.Task;
 import applications.mandelbrotset.IterationCounts;
 import applications.mandelbrotset.TaskMandelbrotSet;
 import java.awt.Color;

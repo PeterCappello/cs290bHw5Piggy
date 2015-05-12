@@ -21,42 +21,18 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package api;
-import java.io.Serializable;
-import system.Return;
-import java.util.concurrent.Callable;
-import system.Computer2Space;
-import system.ComputerImpl;
+package system;
+
+import api.Shared;
+import java.rmi.Remote;
+import java.rmi.RemoteException;
 
 /**
  *
  * @author Peter Cappello
  */
-abstract public class Task implements Serializable, Callable<Return> 
-{ 
-    private int id;
-    private int composeId;
-    private int composeArgNum;
-    private ComputerImpl computerImpl;
-    protected Computer2Space space;
-    
-    @Override
-    abstract public Return call(); 
-        
-    public int  id() { return id; }
-    public void id( int id ) { this.id = id; }
-    
-    public int  composeArgNum() { return composeArgNum; }
-    public void composeArgNum( int composeArgNum ) { this.composeArgNum = composeArgNum; }
-    
-    public int  composeId() { return composeId; }
-    public void composeId( int composeId ) { this.composeId = composeId; }
-    
-    public void computer( ComputerImpl computerImpl ) { this.computerImpl = computerImpl; }
-    
-    public Shared shared() { return computerImpl.shared(); }
-    
-    public void shared( Shared shared ) { computerImpl.upShared( shared ); }
-    
-    public boolean isSpaceCallable() { return this instanceof TaskCompose; }
+public interface Computer extends Remote
+{        
+    public Return execute( Task task ) throws RemoteException;    
+    void downShared( Shared shared ) throws RemoteException;
 }

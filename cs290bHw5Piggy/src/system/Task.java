@@ -22,20 +22,41 @@
  * THE SOFTWARE.
  */
 package system;
-
-import api.Computer;
 import api.Shared;
-import java.rmi.Remote;
-import java.rmi.RemoteException;
-import java.util.List;
+import api.Space;
+import api.TaskCompose;
+import java.io.Serializable;
+import java.util.concurrent.Callable;
 
 /**
  *
  * @author Peter Cappello
  */
-public interface Computer2Space extends Remote //Space
-{
-    void registerExternalComputer( Computer computer, List<Worker> workerList ) throws RemoteException;
+abstract public class Task implements Serializable, Callable<Return> 
+{ 
+    private int id;
+    private int composeId;
+    private int composeArgNum;
+    private ComputerImpl computerImpl;
+    protected Space space;
     
-    void upShared( Shared shared ) throws RemoteException;
+    @Override
+    abstract public Return call(); 
+        
+    public int  id() { return id; }
+    public void id( int id ) { this.id = id; }
+    
+    public int  composeArgNum() { return composeArgNum; }
+    public void composeArgNum( int composeArgNum ) { this.composeArgNum = composeArgNum; }
+    
+    public int  composeId() { return composeId; }
+    public void composeId( int composeId ) { this.composeId = composeId; }
+    
+    public void computer( ComputerImpl computerImpl ) { this.computerImpl = computerImpl; }
+    
+    public Shared shared() { return computerImpl.shared(); }
+    
+    public void shared( Shared shared ) { computerImpl.upShared( shared ); }
+    
+    public boolean isSpaceCallable() { return this instanceof TaskCompose; }
 }
