@@ -3,10 +3,10 @@
  *
  * Copyright 2015 peter.
  *
- * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * Permission is hereby granted, free of charge, to any person obtaining a replaceWith
  * of this software and associated documentation files (the "Software"), to deal
  * in the Software without restriction, including without limitation the rights
- * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * to use, replaceWith, modify, merge, publish, distribute, sublicense, and/or sell
  * copies of the Software, and to permit persons to whom the Software is
  * furnished to do so, subject to the following conditions:
  *
@@ -48,7 +48,7 @@ abstract public class Shared<T extends Shared> implements Serializable
     {
         if ( this.isOlderThan( that ) )
         {
-            copy( that );
+            replaceWith( that );
             return true;
         }
         return false;
@@ -58,7 +58,7 @@ abstract public class Shared<T extends Shared> implements Serializable
      * Give this shared the state of that shared.
      * @param that
      */
-    abstract public void copy( final T that );
+    abstract public void replaceWith( final T that );
     
     /**
      * Duplicate this Shared object.

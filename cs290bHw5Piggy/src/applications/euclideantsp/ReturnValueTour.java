@@ -1,12 +1,12 @@
 /*
  * The MIT License
  *
- * Copyright 2015 peter.
+ * Copyright 2015 Peter Cappello.
  *
- * Permission is hereby granted, free of charge, to any person obtaining a replaceWith
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
  * in the Software without restriction, including without limitation the rights
- * to use, replaceWith, modify, merge, publish, distribute, sublicense, and/or sell
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
  * copies of the Software, and to permit persons to whom the Software is
  * furnished to do so, subject to the following conditions:
  *
@@ -21,116 +21,41 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package clients;
+package applications.euclideantsp;
 
-import api.Shared;
-import system.Task;
-import applications.euclideantsp.SharedTour;
+import api.ReturnValue;
+import static applications.euclideantsp.TaskEuclideanTsp.CITIES;
 import java.awt.Color;
 import java.awt.Graphics;
 import java.awt.Image;
 import java.awt.image.BufferedImage;
-import java.rmi.RemoteException;
 import java.util.List;
-import javax.swing.ImageIcon;
-import javax.swing.JLabel;
-import applications.euclideantsp.TaskEuclideanTsp;
-import java.util.ArrayList;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import util.EuclideanGraph;
-import static util.EuclideanGraph.generateRandomGraph;
-import static util.EuclideanGraph.tourDistance;
+import javax.swing.ImageIcon;
+import javax.swing.JLabel;
+import system.Task;
 
 /**
  *
  * @author Peter Cappello
  */
-public class ClientEuclideanTsp extends Client<TaskEuclideanTsp>
+public class ReturnValueTour extends ReturnValue<Tour>
 {
-    // configure application
-    static private final int NUM_PIXALS = 600;
-    static public  final double[][] CITIES = //generateRandomGraph( 15, 11 );
-//    {
-//        { 0, 0 },
-//        { 0, 1 },
-//        { 0, 2 },
-//        { 0, 3 }
-//    };
-//    {
-//	{ 1, 1 },
-//	{ 8, 1 },
-//	{ 8, 8 },
-//	{ 1, 8 },
-//	{ 2, 2 },
-//	{ 7, 2 },
-//	{ 7, 7 },
-//	{ 2, 7 },
-//	{ 3, 3 },
-//	{ 6, 3 },
-//	{ 6, 6 },
-//	{ 3, 6 }
-//    };
-    {
-        { 1, 1 },
-	{ 8, 1 },
-	{ 8, 8 },
-	{ 1, 8 },
-	{ 2, 2 },
-	{ 7, 2 },
-	{ 7, 7 },
-	{ 2, 7 },
-	{ 3, 3 },
-	{ 6, 3 },
-	{ 6, 6 },
-	{ 3, 6 },
-	{ 4, 4 },
-	{ 5, 4 },
-	{ 5, 5 },
-	{ 4, 5 }
-    };
-    static private Client client() throws RemoteException { return new ClientEuclideanTsp(); }
-    static private final int NUM_COMPUTERS = 2;
-    static private List<Integer> unvisitedCities()
-    {
-        final List<Integer> unvisitedCities = new ArrayList<>();
-        for ( int city = 1; city < CITIES.length; city++ )
-        {
-            unvisitedCities.add( city );
-        }
-        return unvisitedCities;
-    }
-    static private List<Integer> partialTour()
-    {
-        final List<Integer> partialTour = new ArrayList<>();
-        partialTour.add( 0 );
-        return partialTour;
-    }
-    static private final Task TASK = new TaskEuclideanTsp( partialTour(), unvisitedCities() );
-//    static private final Shared SHARED = new SharedTour( Double.MAX_VALUE );
-    static private final double greedyUpperBound = tourDistance( CITIES, EuclideanGraph.greedyTour( CITIES ) );
-    static private final Shared SHARED = new SharedTour( greedyUpperBound );
+    static final private int NUM_PIXELS = 600;
     
-    public ClientEuclideanTsp() throws RemoteException
-    { 
-        super( "Euclidean TSP" ); 
-    }
-    
-    public static void main( String[] args ) throws Exception
-    {
-//        System.out.println("Greedy tour: " + EuclideanGraph.greedyTour( CITIES ));
-//        System.out.println("GreedyUpperBound: " + greedyUpperBound );
-        Client.runClient( client(), NUM_COMPUTERS, TASK, SHARED );
-    }
+    ReturnValueTour( final Task task, final Tour tour ) { super( task, tour ); }
     
     @Override
-    public JLabel getLabel( final TaskEuclideanTsp tour )
+    public JLabel view() 
     {
-        List<Integer> cityList = tour.tour();
-        Logger.getLogger( ClientEuclideanTsp.class.getCanonicalName() ).log(Level.INFO, cityList.toString() );
+        List<Integer> cityList = value().tour();
+        Logger.getLogger( this.getClass().getCanonicalName() )
+              .log( Level.INFO, "Tour: {0}", value().toString() );
+        Integer[] tour = cityList.toArray( new Integer[0] );
 
         // display the graph graphically, as it were
-        // get minX, maxX, minY, maxY, assuming they 0.0 <= mins
+        // get minX, maxX, minY, maxY, assuming 0.0 <= mins
         double minX = CITIES[0][0], maxX = CITIES[0][0];
         double minY = CITIES[0][1], maxY = CITIES[0][1];
         for ( double[] cities : CITIES ) 
@@ -154,27 +79,27 @@ public class ClientEuclideanTsp extends Client<TaskEuclideanTsp>
             scaledCities[i][1] = ( CITIES[i][1] - minY ) / side;
         }
 
-        final Image image = new BufferedImage( NUM_PIXALS, NUM_PIXALS, BufferedImage.TYPE_INT_ARGB );
+        final Image image = new BufferedImage( NUM_PIXELS, NUM_PIXELS, BufferedImage.TYPE_INT_ARGB );
         final Graphics graphics = image.getGraphics();
 
         final int margin = 10;
-        final int field = NUM_PIXALS - 2*margin;
+        final int field = NUM_PIXELS - 2*margin;
         // draw edges
         graphics.setColor( Color.BLUE );
         int x1, y1, x2, y2;
-        int city1 = cityList.get( 0 ), city2;
+        int city1 = tour[0], city2;
         x1 = margin + (int) ( scaledCities[city1][0]*field );
         y1 = margin + (int) ( scaledCities[city1][1]*field );
         for ( int i = 1; i < CITIES.length; i++ )
         {
-            city2 = cityList.get( i );
+            city2 = tour[i];
             x2 = margin + (int) ( scaledCities[city2][0]*field );
             y2 = margin + (int) ( scaledCities[city2][1]*field );
             graphics.drawLine( x1, y1, x2, y2 );
             x1 = x2;
             y1 = y2;
         }
-        city2 = cityList.get( 0 );
+        city2 = tour[0];
         x2 = margin + (int) ( scaledCities[city2][0]*field );
         y2 = margin + (int) ( scaledCities[city2][1]*field );
         graphics.drawLine( x1, y1, x2, y2 );
@@ -189,7 +114,6 @@ public class ClientEuclideanTsp extends Client<TaskEuclideanTsp>
             graphics.fillOval( x - VERTEX_DIAMETER/2,
                                y - VERTEX_DIAMETER/2,
                               VERTEX_DIAMETER, VERTEX_DIAMETER);
-            graphics.drawString(" " + i, x + 3, y + 3);
         }
         final ImageIcon imageIcon = new ImageIcon( image );
         return new JLabel( imageIcon );

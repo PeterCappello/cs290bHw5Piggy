@@ -21,19 +21,41 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package system;
+package applications.euclideantsp;
 
-import api.Shared;
-import java.rmi.Remote;
-import java.rmi.RemoteException;
+import java.io.Serializable;
+import java.util.List;
 
 /**
  *
  * @author Peter Cappello
  */
-public interface Computer extends Remote
-{        
-    public Return execute( Task task ) throws RemoteException; 
+public class Tour implements Comparable<Tour>, Serializable
+{
+    final private List<Integer> tour;
+    final private double cost;
     
-    void downShared( Shared shared ) throws RemoteException;
+    /**
+     * Return container for TaskEuclideanTsp.
+     * @param tour
+     * @param cost
+     */
+    public Tour( List<Integer> tour, double cost ) 
+    {
+        this.tour = tour;
+        this.cost = cost;
+    } 
+ 
+    public List<Integer> tour() { return tour; }
+    
+    public double cost() { return cost; }
+
+    @Override
+    public int compareTo( Tour tour )
+    { 
+        return this.cost < tour.cost ? -1 : this.cost > tour.cost ? 1 : 0;
+    }
+    
+    @Override
+    public String toString() { return tour.toString() + "\n\tCost: " + cost; }
 }

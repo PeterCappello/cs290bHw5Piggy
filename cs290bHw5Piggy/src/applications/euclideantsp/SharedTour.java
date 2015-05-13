@@ -3,10 +3,10 @@
  *
  * Copyright 2015 peter.
  *
- * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * Permission is hereby granted, free of charge, to any person obtaining a replaceWith
  * of this software and associated documentation files (the "Software"), to deal
  * in the Software without restriction, including without limitation the rights
- * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * to use, replaceWith, modify, merge, publish, distribute, sublicense, and/or sell
  * copies of the Software, and to permit persons to whom the Software is
  * furnished to do so, subject to the following conditions:
  *
@@ -24,29 +24,42 @@
 package applications.euclideantsp;
 
 import api.Shared;
+import java.util.List;
 
 /**
  * 
  * @author Peter Cappello
  */
-final public class SharedMinDouble extends Shared<SharedMinDouble>
+final public class SharedTour extends Shared<SharedTour>
 {
-    private double minCost;
+    private List<Integer> tour;
+    private double cost;
     
     /**
      *
-     * @param minCost
+     * @param tour
+     * @param cost
      */
-    public SharedMinDouble( double minCost ) { this.minCost = minCost; }
+    public SharedTour( final List<Integer> tour, final double cost ) 
+    { 
+        this.tour = tour;
+        this.cost = cost; 
+    }
     
      @Override
-    synchronized public void copy( SharedMinDouble that ) { this.minCost = that.minCost(); }
+    synchronized public void replaceWith( SharedTour that ) 
+    { 
+        tour = that.tour();
+        cost = that.cost(); 
+    }
     
     @Override
-    synchronized public Shared duplicate() { return new SharedMinDouble( minCost ); }
+    synchronized public Shared duplicate() { return new SharedTour( tour, cost ); }
     
     @Override
-    synchronized public boolean isOlderThan( final SharedMinDouble that ) { return minCost > that.minCost(); }
+    synchronized public boolean isOlderThan( final SharedTour that ) { return cost > that.cost(); }
     
-    synchronized public double minCost() { return minCost; }
+    synchronized public List<Integer> tour() { return tour; }
+    
+    synchronized public double cost() { return cost; }
 }

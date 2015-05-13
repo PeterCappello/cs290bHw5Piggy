@@ -23,6 +23,8 @@
  */
 package api;
 
+import applications.euclideantsp.SharedTour;
+import static clients.ClientEuclideanTsp.CITIES;
 import system.Task;
 import java.awt.BorderLayout;
 import java.awt.Container;
@@ -38,6 +40,8 @@ import javax.swing.JScrollPane;
 import system.ComputerImpl;
 import system.Configuration;
 import system.SpaceImpl;
+import util.EuclideanGraph;
+import static util.EuclideanGraph.tourDistance;
 
 /**
  * The class used to "run" the Job.
@@ -71,9 +75,7 @@ public class JobRunner<T> extends JFrame
                              ? Runtime.getRuntime().availableProcessors() : 1;
             for ( int i = 0; i < numComputers; i++ )
             {
-                ComputerImpl computer = new ComputerImpl();
-//                space.register( computer, computer.workerList() );
-                space.register( computer, ComputerImpl.FACTOR * numComputers );
+                space.register( new ComputerImpl( space ), SpaceImpl.PROXIES_PER_PROCESSOR * numComputers );
             }
         }
         else
@@ -98,6 +100,21 @@ public class JobRunner<T> extends JFrame
     public void run( final Task task ) throws RemoteException
     {
         ReturnValue<T> returnValue = space.compute( task );
+        view( returnValue.view() );
+        Logger.getLogger( this.getClass().getCanonicalName() )
+              .log( Level.INFO, "Job run time: {0} ms.", ( System.nanoTime() - startTime ) / 1000000 );
+    }
+    
+    /**
+     * Run the Job: Generate the tasks, retrieve the results, compose a solution
+     * to the original problem, and display the solution.
+     * @param task the task that defines the job.
+     * @throws RemoteException occurs if there is a communication problem or
+     * the remote service is not responding
+     */
+    public void run( final Task task, Shared shared ) throws RemoteException
+    {
+        ReturnValue<T> returnValue = space.compute( task, shared );
         view( returnValue.view() );
         Logger.getLogger( this.getClass().getCanonicalName() )
               .log( Level.INFO, "Job run time: {0} ms.", ( System.nanoTime() - startTime ) / 1000000 );
