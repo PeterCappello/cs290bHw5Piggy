@@ -35,11 +35,6 @@ public class SumIntegers extends TaskCompose<Integer>
     @Override
     public ReturnValue call() 
     {
-//        return new ReturnValue<>( this, args().get( 0 ) + args().get( 1 ) );
-        Integer a0 = args().get( 0 );
-        assert a0 != null : a0;
-        Integer a1 = args().get( 1 );
-        assert a1 != null : a1;
-        return new ReturnValue<>( this, a0 + a1 );
+        return new ReturnValueFibonacci( this, args().get( 0 ) + args().get( 1 ) );
     }
 }

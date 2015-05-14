@@ -25,8 +25,8 @@ package applications.mandelbrotset;
 
 import api.ReturnValue;
 import api.TaskCompose;
-import static clients.ClientMandelbrotSet.BLOCK_SIZE;
-import static clients.ClientMandelbrotSet.N_PIXELS;
+import static applications.mandelbrotset.TaskMandelbrotSet.BLOCK_SIZE;
+import static applications.mandelbrotset.TaskMandelbrotSet.N_PIXELS;
 
 /**
  *
@@ -49,6 +49,6 @@ public class AddBlocks extends TaskCompose<IterationCounts>
                 System.arraycopy( blockCounts[ row ], 0, counts[ blockRow * BLOCK_SIZE + row ], blockCol * BLOCK_SIZE, BLOCK_SIZE );
             }
         }
-        return new ReturnValue<>( this, counts );
+        return new ReturnValueIterationCounts( this, new IterationCounts( counts, 0, 0 ) );
     }
 }

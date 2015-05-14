@@ -22,16 +22,11 @@
  * THE SOFTWARE.
  */
 package applications.mandelbrotset;
+import api.JobRunner;
 import api.ReturnDecomposition;
 import api.ReturnValue;
 import system.Task;
 import api.TaskRecursive;
-import static clients.ClientMandelbrotSet.BLOCK_SIZE;
-import static clients.ClientMandelbrotSet.EDGE_LENGTH;
-import static clients.ClientMandelbrotSet.ITERATION_LIMIT;
-import static clients.ClientMandelbrotSet.LOWER_LEFT_X;
-import static clients.ClientMandelbrotSet.LOWER_LEFT_Y;
-import static clients.ClientMandelbrotSet.N_PIXELS;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -41,7 +36,22 @@ import java.util.List;
  */
 public class TaskMandelbrotSet extends TaskRecursive<IterationCounts>
 {
+    // Configure Job 
+    static public final double LOWER_LEFT_X = -0.7510975859375;
+    static public final double LOWER_LEFT_Y = 0.1315680625;
+    static public final double EDGE_LENGTH = 0.01611;
+    static public final int N_PIXELS = 1024;
+    static public final int ITERATION_LIMIT = 512;
+    static public final int BLOCK_SIZE = 256;
+    
+    static final private String FRAME_TITLE = "Mandelbrot Set Visualization";
+    static final private Task TASK = new TaskMandelbrotSet( LOWER_LEFT_X, LOWER_LEFT_Y, EDGE_LENGTH , N_PIXELS, ITERATION_LIMIT, 0, 0 );
     static final private int MAX_NUM_PIXELS = 256;
+    
+    public static void main( final String[] args ) throws Exception
+    {
+        new JobRunner( FRAME_TITLE, args ).run( TASK );
+    }
     
     final private double lowerLeftX;
     final private double lowerLeftY;
@@ -75,7 +85,7 @@ public class TaskMandelbrotSet extends TaskRecursive<IterationCounts>
             {
                 counts[row][col] = getIterationCount( row, col, delta );
             }
-        return new ReturnValue<>( this, new IterationCounts( counts, 0, 0 ) );
+        return new ReturnValueIterationCounts( this, new IterationCounts( counts, blockRow, blockCol ) );
     }
 
     @Override

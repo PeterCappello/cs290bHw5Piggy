@@ -23,7 +23,6 @@
  */
 package applications.euclideantsp;
 
-import clients.ClientEuclideanTsp;
 import java.util.ArrayList;
 import java.util.List;
 import static util.EuclideanGraph.distance;
@@ -35,7 +34,7 @@ import static util.EuclideanGraph.tourDistance;
  */
 final public class LowerBoundPartialTour implements LowerBound
 {
-    static final private double[][] CITIES = ClientEuclideanTsp.CITIES;
+    static final private double[][] CITIES = TaskEuclideanTsp.CITIES;
            final private double lowerBound;
     
     public LowerBoundPartialTour( final List<Integer> partialTour )

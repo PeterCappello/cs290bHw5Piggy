@@ -1,7 +1,7 @@
 /*
  * The MIT License
  *
- * Copyright 2015 peter.
+ * Copyright 2015 Peter Cappello.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -21,36 +21,27 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package clients;
+package applications.fibonacci;
 
-import system.Task;
-import applications.fibonacci.TaskFibonacci;
-import java.rmi.RemoteException;
+import api.ReturnValue;
 import javax.swing.JLabel;
 import javax.swing.SwingConstants;
+import system.Task;
 
 /**
  *
  * @author Peter Cappello
  */
-public class ClientFibonacci extends Client<Integer>
-{
-    // configure application
-    static private final int N = 16; // F(16) = 987
-    static private  final int NUM_COMPUTERS = 2;
-    static private  final Task TASK = new TaskFibonacci( N );
-    static private  Client client() throws RemoteException { return new ClientFibonacci(); }
-    
-    public ClientFibonacci() throws RemoteException { super( "Fibonacci Number" ); }
-
-    public static void main( String[] args ) throws Exception
-    {  
-        Client.runClient( client(), NUM_COMPUTERS, TASK );
+public class ReturnValueFibonacci extends ReturnValue<Integer>
+{    
+    ReturnValueFibonacci( final Task task, Integer value )
+    {
+        super( task, value );
     }
     
     @Override
-    JLabel getLabel( Integer returnValue )
-    { 
-        return new JLabel( " " + TASK.toString() + "= " + returnValue + " ", SwingConstants.CENTER ) ; 
+    public JLabel view() 
+    {
+        return new JLabel( "    The Fibonacci number is " + value() + "    ", SwingConstants.CENTER ) ;
     }
 }

@@ -23,6 +23,7 @@
  */
 package applications.fibonacci;
 
+import api.JobRunner;
 import api.ReturnDecomposition;
 import api.ReturnValue;
 import system.Task;
@@ -36,6 +37,16 @@ import java.util.List;
  */
 public class TaskFibonacci extends TaskRecursive<Integer>
 { 
+    // Configure Job
+    static private final int    N           = 20; // F(16) = 987
+    static private final Task   TASK        = new TaskFibonacci( N );
+    static private final String FRAME_TITLE = "Fibonacci number";
+    
+    public static void main( final String[] args ) throws Exception
+    {
+        new JobRunner( FRAME_TITLE, args ).run( TASK );
+    }
+    
     final private int n;
             
     public TaskFibonacci( int n ) 
@@ -51,7 +62,7 @@ public class TaskFibonacci extends TaskRecursive<Integer>
     public boolean isAtomic() { return n < 2; }
 
     @Override
-    public ReturnValue<Integer> solve() { return new ReturnValue<>( this, n ); }
+    public ReturnValue<Integer> solve() { return new ReturnValueFibonacci( this, n ); }
 
     @Override
     public ReturnDecomposition divideAndConquer() 
@@ -59,7 +70,6 @@ public class TaskFibonacci extends TaskRecursive<Integer>
         List<Task> subtasks = new ArrayList<>();
         subtasks.add( new TaskFibonacci( n - 2 ) );
         subtasks.add( new TaskFibonacci( n - 1 ) );
-        
         return new ReturnDecomposition( new SumIntegers(), subtasks ); 
     }
     

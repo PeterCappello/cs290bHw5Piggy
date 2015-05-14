@@ -23,8 +23,6 @@
  */
 package api;
 
-import applications.euclideantsp.SharedTour;
-import static clients.ClientEuclideanTsp.CITIES;
 import system.Task;
 import java.awt.BorderLayout;
 import java.awt.Container;
@@ -40,8 +38,6 @@ import javax.swing.JScrollPane;
 import system.ComputerImpl;
 import system.Configuration;
 import system.SpaceImpl;
-import util.EuclideanGraph;
-import static util.EuclideanGraph.tourDistance;
 
 /**
  * The class used to "run" the Job.

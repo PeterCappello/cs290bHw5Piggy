@@ -23,7 +23,6 @@
  */
 package applications.euclideantsp;
 
-import clients.ClientEuclideanTsp;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -39,7 +38,7 @@ import static util.EuclideanGraph.tourDistance;
 final public class LowerBoundNearestNeighbors implements LowerBound 
 {
     static final private Integer    EMPTY = -1;
-    static final private double[][] CITIES = ClientEuclideanTsp.CITIES;
+    static final private double[][] CITIES = TaskEuclideanTsp.CITIES;
     
            final private List<Deque<Integer>> nearestNeighborsList;
            final private double lowerBound;

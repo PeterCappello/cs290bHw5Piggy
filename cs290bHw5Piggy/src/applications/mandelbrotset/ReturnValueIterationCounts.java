@@ -1,7 +1,7 @@
 /*
  * The MIT License
  *
- * Copyright 2015 peter.
+ * Copyright 2015 Peter Cappello.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -21,55 +21,31 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package clients;
-import system.Task;
-import applications.mandelbrotset.IterationCounts;
-import applications.mandelbrotset.TaskMandelbrotSet;
+package applications.mandelbrotset;
+
+import api.ReturnValue;
+import static applications.mandelbrotset.TaskMandelbrotSet.ITERATION_LIMIT;
+import static applications.mandelbrotset.TaskMandelbrotSet.N_PIXELS;
 import java.awt.Color;
 import java.awt.Graphics;
 import java.awt.Image;
 import java.awt.image.BufferedImage;
-import java.rmi.RemoteException;
 import javax.swing.ImageIcon;
 import javax.swing.JLabel;
+import system.Task;
 
 /**
  *
  * @author Peter Cappello
  */
-public class ClientMandelbrotSet extends Client<IterationCounts>
+public class ReturnValueIterationCounts extends ReturnValue<IterationCounts>
 {
-    // configure application
-    public static final double LOWER_LEFT_X = -0.7510975859375;
-    public static final double LOWER_LEFT_Y = 0.1315680625;
-    public static final double EDGE_LENGTH = 0.01611;
-    public static final int N_PIXELS = 1024;
-    public static final int ITERATION_LIMIT = 512;
-    public static final int BLOCK_SIZE = 256;
-    static private Client client() throws RemoteException { return new ClientMandelbrotSet(); }
-    static private final int NUM_COMPUTERS = 4;
-    private static final Task TASK = 
-            new TaskMandelbrotSet( LOWER_LEFT_X, LOWER_LEFT_Y, EDGE_LENGTH, N_PIXELS, ITERATION_LIMIT, 0, 0 );
-
-    public ClientMandelbrotSet() throws RemoteException 
-    { 
-        super( "Mandelbrot Set Visualizer" );
-    }
-    
-    /**
-     * Run the MandelbrotSet visualizer client.
-     * @param args unused 
-     * @throws java.rmi.RemoteException 
-     */
-    public static void main( String[] args ) throws Exception
-    {  
-        Client.runClient( client(), NUM_COMPUTERS, TASK );
-    }
+    ReturnValueIterationCounts( final Task task, final IterationCounts counts ) { super( task, counts ); }
     
     @Override
-    public JLabel getLabel( IterationCounts iterationCounts )
+    public JLabel view() 
     {
-        Integer[][] counts =  iterationCounts.counts();
+        final Integer[][] counts = value().counts();
         final Image image = new BufferedImage( N_PIXELS, N_PIXELS, BufferedImage.TYPE_INT_ARGB );
         final Graphics graphics = image.getGraphics();
         for ( int i = 0; i < counts.length; i++ )
@@ -82,7 +58,7 @@ public class ClientMandelbrotSet extends Client<IterationCounts>
         return new JLabel( imageIcon );
     }
     
-    private Color getColor( int iterationCount )
+    private Color getColor( final int iterationCount )
     {
         return iterationCount == ITERATION_LIMIT ? Color.BLACK : Color.WHITE;
     }

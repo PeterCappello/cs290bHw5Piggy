@@ -29,7 +29,6 @@ import api.ReturnValue;
 import api.Shared;
 import system.Task;
 import api.TaskRecursive;
-import static clients.ClientEuclideanTsp.CITIES;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
@@ -43,7 +42,6 @@ import static util.EuclideanGraph.tourDistance;
  * @author Peter Cappello
  */
 public class TaskEuclideanTsp extends TaskRecursive<Tour>
-//public class TaskEuclideanTsp extends TaskRecursive<Tour>
 { 
     static final public double[][] CITIES =
     {
@@ -58,7 +56,11 @@ public class TaskEuclideanTsp extends TaskRecursive<Tour>
 	{ 3, 3 },
 	{ 6, 3 },
 	{ 6, 6 },
-	{ 3, 6 }
+	{ 3, 6 },
+	{ 4, 4 },
+//	{ 5, 4 },
+//	{ 5, 5 },
+	{ 4, 5 }
     };
     static final Integer ONE = 1;
     static final Integer TWO = 2;
