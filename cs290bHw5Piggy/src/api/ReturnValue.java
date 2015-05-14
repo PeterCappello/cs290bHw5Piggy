@@ -51,20 +51,35 @@ abstract public class ReturnValue<T> extends Return
    
     /**
      * Update the taskCompose task that is waiting for this input.
-     * @param parentTask unused - the task whose Result is to be processed.
+     * @param associatedTask unused - the task whose Result is to be processed.
      * @param space containing the taskCompose task that is waiting for this value.
      */
     @Override
-    public void process( final Task parentTask, final SpaceImpl space )
+    public void process( final Task associatedTask, final SpaceImpl space )
     {
+        if ( associatedTask instanceof TaskCompose )
+        {
+            TaskCompose task = (TaskCompose) associatedTask;
+            long commonTime = task.decomposeTaskRunTime() + taskRunTime();
+            t1(   commonTime + task.sumChildT1() );
+            tInf( commonTime + task.maxChildTInf() );
+        }
+        else
+        {
+            t1(   taskRunTime() );
+            tInf( taskRunTime() );
+        }
         if ( composeId == SpaceImpl.FINAL_RETURN_VALUE )
         {
+            space.tInf( tInf() );
             space.putResult( this );
             return;
         }
         TaskCompose taskCompose = space.getCompose( composeId );
         assert taskCompose != null;
         taskCompose.arg( composeArgNum, value, space );
+        taskCompose.sumChildT1( t1() );
+        taskCompose.maxChildTInf( tInf() );
     }
     
     abstract public JLabel view();

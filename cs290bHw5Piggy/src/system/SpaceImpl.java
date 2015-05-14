@@ -261,7 +261,9 @@ public final class SpaceImpl extends UnicastRemoteObject implements Space
     private void reportTimeMeasures( Return result )
     {
         Logger.getLogger( getClass().getCanonicalName() )
-              .log(Level.INFO, "\n\tTotal tasks: {0} \n\tT_1: {1}ms.\n\tT_inf: {2}ms.", new Object[]{numTasks, result.t1() / 1000000, result.tInf() / 1000000});
+              .log( Level.INFO, 
+                    "\n\tTotal tasks: {0} \n\tT_1: {1}ms.\n\tT_inf: {2}ms.\n\tT_1 / T_inf: {3}", 
+                    new Object[]{ numTasks, result.t1() / 1000000, result.tInf() / 1000000, result.t1() / result.tInf() } );
     }
     
     private class ComputerProxy extends Thread

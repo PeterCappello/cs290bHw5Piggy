@@ -43,6 +43,7 @@ import static util.EuclideanGraph.tourDistance;
  */
 public class TaskEuclideanTsp extends TaskRecursive<Tour>
 { 
+    // Configure Job
     static final public double[][] CITIES =
     {
 	{ 1, 1 },
@@ -58,34 +59,12 @@ public class TaskEuclideanTsp extends TaskRecursive<Tour>
 	{ 6, 6 },
 	{ 3, 6 },
 	{ 4, 4 },
-//	{ 5, 4 },
-//	{ 5, 5 },
+	{ 5, 4 },
+	{ 5, 5 },
 	{ 4, 5 }
     };
-    static final Integer ONE = 1;
-    static final Integer TWO = 2;
-    static final Integer MAX_UNVISITED_CITIES = 10;
-    
-    static private List<Integer> initialPartialTour()
-    {
-        List<Integer> partialTour = new ArrayList<>();
-        partialTour.add( 0 );
-        return partialTour;
-    }
-    
-    static private List<Integer> initialUnvisitedCities()
-    {
-        final List<Integer> unvisitedCities = new ArrayList<>();
-        for ( int city = 1; city < CITIES.length; city++ )
-        {
-            unvisitedCities.add( city );
-        }
-        return unvisitedCities;
-    }
-    
-    // Configure Job
     static final private String FRAME_TITLE = "Euclidean TSP";
-    static final private Task TASK = new TaskEuclideanTsp( initialPartialTour(), initialUnvisitedCities() );
+    static final private Task TASK = new TaskEuclideanTsp();
     static final private List<Integer> GREEDY_TOUR = EuclideanGraph.greedyTour( CITIES ) ;
     static private final double UPPER_BOUND = tourDistance( CITIES, GREEDY_TOUR );
     static private final Shared SHARED = new SharedTour( GREEDY_TOUR, UPPER_BOUND );
@@ -95,25 +74,46 @@ public class TaskEuclideanTsp extends TaskRecursive<Tour>
         new JobRunner( FRAME_TITLE, args ).run( TASK, SHARED );
     }
     
-    final private List<Integer> partialTour;
-    final private List<Integer> unvisitedCities;
-    final private LowerBound lowerBound;
+    static final Integer ONE = 1;
+    static final Integer TWO = 2;
+    static final Integer MAX_UNVISITED_CITIES = 12;
+    
+    private List<Integer> partialTour;
+    private List<Integer> unvisitedCities;
+    private LowerBound lowerBound;
+    private boolean partialTourContains1;
+    private boolean pruneMe;
             
-    public TaskEuclideanTsp( List<Integer> partialTour, List<Integer> unvisitedCities )
+    public TaskEuclideanTsp()
     {
-        this.partialTour = partialTour;
-        this.unvisitedCities = unvisitedCities;
-//        lowerBound = new LowerBoundNearestNeighbors();
-        lowerBound = new LowerBoundPartialTour( partialTour );
+        partialTour = new ArrayList<>();
+        partialTour.add( 0 );
+        this.unvisitedCities = new ArrayList<>();
+        for ( int city = 1; city < CITIES.length; city++ )
+        {
+            unvisitedCities.add( city );
+        }
+        lowerBound = new LowerBoundNearestNeighbors();
+//        lowerBound = new LowerBoundPartialTour( partialTour );
     }
     
     TaskEuclideanTsp( TaskEuclideanTsp parentTask, Integer newCity )
     {
+        if ( ! parentTask.partialTourContains1 && newCity.equals( TWO ) )
+        {
+            pruneMe = true;
+            return;
+        }
         partialTour = new ArrayList<>( parentTask.partialTour );
         lowerBound = parentTask.lowerBound.make( parentTask, newCity );
-        unvisitedCities = new LinkedList<>( parentTask.unvisitedCities );     
+        unvisitedCities = new LinkedList<>( parentTask.unvisitedCities ); 
+        
         partialTour.add( newCity );
         unvisitedCities.remove( newCity );
+        if ( newCity.equals( ONE ) )
+        {
+            partialTourContains1 = true;
+        }
     }
     
     @Override
@@ -162,7 +162,11 @@ public class TaskEuclideanTsp extends TaskRecursive<Tour>
         final List<Task> children = new  LinkedList<>();
         for ( Integer city : unvisitedCities )
         {
-            children.add( new TaskEuclideanTsp( this, city ) );
+            TaskEuclideanTsp child = new TaskEuclideanTsp( this, city );
+            if ( ! child.pruneMe )
+            {
+                children.add( child );
+            }
         }
         return new ReturnDecomposition( new MinTour(), children );
     }
@@ -180,9 +184,9 @@ public class TaskEuclideanTsp extends TaskRecursive<Tour>
         for ( Integer city : unvisitedCities )
         {
             TaskEuclideanTsp child = new TaskEuclideanTsp( this, city );
-            if ( child.lowerBound().cost() < upperBound )
+            if ( ! child.pruneMe && child.lowerBound().cost() < upperBound )
             {
-                children.add( child );
+                    children.add( child );
             }
         }
         return children;

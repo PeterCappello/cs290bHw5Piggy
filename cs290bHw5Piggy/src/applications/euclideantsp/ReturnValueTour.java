@@ -50,7 +50,7 @@ public class ReturnValueTour extends ReturnValue<Tour>
     public JLabel view() 
     {
         List<Integer> cityList = value().tour();
-        Logger.getLogger( this.getClass().getCanonicalName() )
+        Logger.getLogger( getClass().getCanonicalName() )
               .log( Level.INFO, "Tour: {0}", value().toString() );
         Integer[] tour = cityList.toArray( new Integer[0] );
 
