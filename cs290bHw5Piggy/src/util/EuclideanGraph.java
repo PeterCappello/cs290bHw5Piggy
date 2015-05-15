@@ -24,10 +24,11 @@
 package util;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Random;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import static util.EuclideanGraph.distance;
 
 /**
@@ -82,6 +83,8 @@ public class EuclideanGraph
             tour.add( nearestCity );
             unvisitedCities.remove( new Integer( nearestCity ) );
         }
+        Logger.getLogger( EuclideanGraph.class.getCanonicalName() )
+              .log(Level.INFO, "\n\tTour: {0}\n\tCost: {1}", new Object[]{ tour, tourDistance( cities, tour ) } );
         return tour;
     }
     

@@ -52,12 +52,12 @@ public final class SpaceImpl extends UnicastRemoteObject implements Space
     static final private AtomicInteger computerIds = new AtomicInteger();
     
     final private AtomicInteger taskIds = new AtomicInteger();
-    final private BlockingQueue<Task>   readyTaskQ = new LinkedBlockingQueue<>();
-    final private BlockingQueue<ReturnValue> resultQ    = new LinkedBlockingQueue<>();
-    final private BlockingQueue<Task>   readySpaceCallableTaskQ = new LinkedBlockingQueue<>();
+    final private BlockingQueue<Task>     readyTaskQ = new LinkedBlockingQueue<>();
+    final private BlockingQueue<ReturnValue> resultQ = new LinkedBlockingQueue<>();
     final private Map<Computer, ComputerProxy> computerProxies = Collections.synchronizedMap( new HashMap<>() );
     final private Map<Integer, TaskCompose>   waitingTaskMap   = Collections.synchronizedMap( new HashMap<>() );
     final private AtomicInteger numTasks = new AtomicInteger();
+    final private ComputerImpl computerInternal;
           private Shared shared; // mutable but thread-safe: its state changes are synchronized on itself.
           private long t1   = 0;
           private long tInf = 0;
@@ -66,12 +66,13 @@ public final class SpaceImpl extends UnicastRemoteObject implements Space
     {
         Logger.getLogger( getClass().getName() )
               .log( Level.INFO, "Space started." );
-//        if ( SPACE_CALLABLE )
-//        {
-//            ComputerImpl computerInternal = new ComputerImpl( this );
-////            registerInternalComputer( computerInternal, Runtime.getRuntime().availableProcessors() );
-//        }
+        if ( SPACE_CALLABLE )
+        {
+            computerInternal = new ComputerImpl( this );
+        }
     }
+    
+    public Computer computer() { return computerInternal; }
     
     /**
      * Compute a Task and return its Return.
@@ -91,10 +92,6 @@ public final class SpaceImpl extends UnicastRemoteObject implements Space
         }
         execute( task );
         return take();
-//        call( task );
-//        Return result = take();
-//        reportTimeMeasures( result );
-//        return result;
     }
     
     /**
@@ -152,26 +149,6 @@ public final class SpaceImpl extends UnicastRemoteObject implements Space
         return null;
     }
 
-    /**
-     * Register Computer with Space.  
-     * Will override existing key-value pair, if any.
-     * @param computer
-     * @param workerList
-     * @throws RemoteException
-     */
-//    @Override
-//    public void registerExternalComputer( Computer computer, List<Worker> workerList ) throws RemoteException
-//    {
-//        final ComputerProxy computerProxy = new ComputerProxy( computer, workerList, readyTaskQ );
-//        register( computer, computerProxy );
-//    }
-    
-//    public void registerInternalComputer( Computer computer, List<Worker> workerList ) throws RemoteException
-//    {
-//        final ComputerProxy computerProxy = new ComputerProxy( computer, workerList, readySpaceCallableTaskQ );
-//        register( computer, computerProxy );
-//    }
-    
     /**
      * Register Computer with Space.  
      * Will override existing key-value pair, if any.
@@ -359,7 +336,7 @@ public final class SpaceImpl extends UnicastRemoteObject implements Space
                 try { synchronized( this ) { wait(); } }
                 catch ( InterruptedException ex ) 
                 {
-                    Logger.getLogger( WorkerProxy.class.getName() )
+                    Logger.getLogger( getClass().getName() )
                           .log( Level.SEVERE, null, ex );
                 }
                 while ( true )
