@@ -55,7 +55,7 @@ public final class SpaceImpl extends UnicastRemoteObject implements Space
     final private BlockingQueue<Task>     readyTaskQ = new LinkedBlockingQueue<>();
     final private BlockingQueue<ReturnValue> resultQ = new LinkedBlockingQueue<>();
     final private Map<Computer, ComputerProxy> computerProxies = Collections.synchronizedMap( new HashMap<>() );
-    final private Map<Integer, TaskCompose>   waitingTaskMap   = Collections.synchronizedMap( new HashMap<>() );
+    final private Map<Integer, TaskCompose>    waitingTaskMap  = Collections.synchronizedMap( new HashMap<>() );
     final private AtomicInteger numTasks = new AtomicInteger();
     final private ComputerImpl computerInternal;
           private Shared shared; // mutable but thread-safe: its state changes are synchronized on itself.
