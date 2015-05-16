@@ -105,13 +105,13 @@ public class JobRunner<T> extends JFrame
      * Run the Job: Generate the tasks, retrieve the results, compose a solution
      * to the original problem, and display the solution.
      * @param task the task that defines the job.
+     * @param shared
      * @throws RemoteException occurs if there is a communication problem or
      * the remote service is not responding
      */
     public void run( final Task task, Shared shared ) throws RemoteException
     {
-        ReturnValue<T> returnValue = space.compute( task, shared );
-        view( returnValue.view() );
+        view( space.compute( task, shared ).view() );
         Logger.getLogger( this.getClass().getCanonicalName() )
               .log( Level.INFO, "Job run time: {0} ms.", ( System.nanoTime() - startTime ) / 1000000 );
     }

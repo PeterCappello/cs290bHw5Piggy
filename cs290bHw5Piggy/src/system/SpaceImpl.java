@@ -58,7 +58,8 @@ public final class SpaceImpl extends UnicastRemoteObject implements Space
     final private Map<Integer, TaskCompose>    waitingTaskMap  = Collections.synchronizedMap( new HashMap<>() );
     final private AtomicInteger numTasks = new AtomicInteger();
     final private ComputerImpl computerInternal;
-          private Shared shared; // mutable but thread-safe: its state changes are synchronized on itself.
+    final private Boolean sharedLock = true;
+          private Shared shared; // !! make immutable.
           private long t1   = 0;
           private long tInf = 0;
     
@@ -76,8 +77,8 @@ public final class SpaceImpl extends UnicastRemoteObject implements Space
     
     /**
      * Compute a Task and return its Return.
-     * To ensure that the correct Return is returned, this must be the only
- computation that the Space is serving.
+     * To ensure that the correct Return is returned, 
+     * this must be the only computation the Space is servicing.
      * 
      * @param task
      * @return the Task's Return object.
@@ -105,7 +106,6 @@ public final class SpaceImpl extends UnicastRemoteObject implements Space
         ReturnValue result = take();
         reportTimeMeasures( result );
         return result;
-        
     }
     /**
      * Put a task into the Task queue.
@@ -175,8 +175,16 @@ public final class SpaceImpl extends UnicastRemoteObject implements Space
     { 
         numTasks.getAndIncrement();
         result.process( parentTask, this );
-        shared.shared( result.shared() );
+        shared = newerShared( result.shared() );
         t1 += result.taskRunTime();
+    }
+    
+    private Shared newerShared( Shared that )
+    {
+        synchronized ( sharedLock )
+        {
+            return this.shared.isOlderThan( that ) ? that : this.shared;
+        }
     }
     
     public int makeTaskId() { return taskIds.incrementAndGet(); }

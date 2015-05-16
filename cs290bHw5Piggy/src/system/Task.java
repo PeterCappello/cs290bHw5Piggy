@@ -37,7 +37,8 @@ abstract public class Task implements Serializable, Callable<Return>
     private int id;
     private int composeId;
     private int composeArgNum;
-    private ComputerImpl computerImpl;
+    private final Boolean sharedLock = true;
+    private Shared shared;
     protected Space space;
     
     @Override
@@ -51,12 +52,17 @@ abstract public class Task implements Serializable, Callable<Return>
     
     public int  composeId() { return composeId; }
     public void composeId( int composeId ) { this.composeId = composeId; }
+        
+    public Shared shared() { return shared; }
+    public void   shared( Shared shared ) { this.shared = newerShared( shared ); }
     
-    public void computer( ComputerImpl computerImpl ) { this.computerImpl = computerImpl; }
-    
-    public Shared shared() { return computerImpl.shared(); }
-    
-    public void shared( Shared shared ) { computerImpl.shared( shared ); }
+    private Shared newerShared( Shared that )
+    {
+        synchronized( sharedLock )
+        {
+            return this.shared == null || this.shared.isOlderThan( that ) ? that : this.shared;
+        }
+    }
     
     public boolean isSpaceCallable() { return this instanceof TaskCompose; }
 }

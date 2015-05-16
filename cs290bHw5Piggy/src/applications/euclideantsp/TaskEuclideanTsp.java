@@ -60,7 +60,7 @@ public class TaskEuclideanTsp extends TaskRecursive<Tour>
 	{ 3, 6 },
 	{ 4, 4 },
 	{ 5, 4 },
-	{ 5, 5 },
+//	{ 5, 5 },
 	{ 4, 5 }
     };
     static final private String FRAME_TITLE = "Euclidean TSP";
@@ -128,7 +128,7 @@ public class TaskEuclideanTsp extends TaskRecursive<Tour>
      @Override
     public ReturnValue solve() 
     {
-        Stack<TaskEuclideanTsp> stack = new Stack<>();
+        final Stack<TaskEuclideanTsp> stack = new Stack<>();
         stack.push( this );
         SharedTour sharedTour = ( SharedTour ) shared();
         List<Integer> shortestTour = sharedTour.tour();
@@ -138,14 +138,13 @@ public class TaskEuclideanTsp extends TaskRecursive<Tour>
             TaskEuclideanTsp currentTask = stack.pop();
             
             // get children with lower bound < current upper bound.
-            List<TaskEuclideanTsp> children = currentTask.children( sharedTour.cost() );
+            List<TaskEuclideanTsp> children = currentTask.children( shortestTourCost );
             for ( TaskEuclideanTsp child : children )
             { 
                 if ( child.isComplete() )
                 { 
                     shortestTour = child.tour();
                     shortestTourCost = child.lowerBound().cost();
-                    shared( new SharedTour( child.tour(), child.lowerBound().cost() ) );
                 } 
                 else 
                 { 

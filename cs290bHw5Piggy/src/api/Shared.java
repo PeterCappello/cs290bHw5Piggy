@@ -26,43 +26,20 @@ package api;
 import java.io.Serializable;
 
 /**
- * This mutable class and its extensions must synchronize all methods.
+ * This is an immutable class.
  * @author Peter Cappello
- * @param <T> the shared object's type.
+ * @param <T> the sharedObject object's type.
  */
 abstract public class Shared<T extends Shared> implements Serializable
 {        
-    private T shared;
+    private T sharedObject;
     
-    synchronized public T shared() { return shared; }
+    public T shared() { return sharedObject; }
     
     /**
-     * Is this shared object older that that shared object?
-     * Implementation must synchronize on this.
+     * Is this sharedObject object older that that sharedObject object?
      * @param that should not be null.
      * @return true if and only if this is older than that.
      */
     abstract public boolean isOlderThan( final T that );
-    
-    synchronized public boolean shared( final T that )
-    {
-        if ( this.isOlderThan( that ) )
-        {
-            replaceWith( that );
-            return true;
-        }
-        return false;
-    }
-    
-    /**
-     * Give this shared the state of that shared.
-     * @param that
-     */
-    abstract public void replaceWith( final T that );
-    
-    /**
-     * Duplicate this Shared object.
-     * @return the duplicate.
-     */
-    abstract public Shared duplicate();
 }

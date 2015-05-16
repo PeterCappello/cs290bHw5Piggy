@@ -32,8 +32,8 @@ import java.util.List;
  */
 final public class SharedTour extends Shared<SharedTour>
 {
-    private List<Integer> tour;
-    private double cost;
+    private final List<Integer> tour;
+    private final double cost;
     
     /**
      *
@@ -45,21 +45,11 @@ final public class SharedTour extends Shared<SharedTour>
         this.tour = tour;
         this.cost = cost; 
     }
-    
-     @Override
-    synchronized public void replaceWith( SharedTour that ) 
-    { 
-        tour = that.tour();
-        cost = that.cost(); 
-    }
-    
+        
     @Override
-    synchronized public Shared duplicate() { return new SharedTour( tour, cost ); }
+    public boolean isOlderThan( final SharedTour that ) { return cost > that.cost(); }
     
-    @Override
-    synchronized public boolean isOlderThan( final SharedTour that ) { return cost > that.cost(); }
+    public List<Integer> tour() { return tour; }
     
-    synchronized public List<Integer> tour() { return tour; }
-    
-    synchronized public double cost() { return cost; }
+    public double cost() { return cost; }
 }
