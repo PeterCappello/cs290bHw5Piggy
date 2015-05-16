@@ -53,7 +53,7 @@ public abstract class TaskCompose<I> extends Task
                 try 
                 { 
                     // assumes TaskCompose is SPACE_CALLABLE.
-                    space.processResult( this, space.computer().execute( this ) );
+                    space.processResult( this, space.computer().execute( this, space.shared() ) );
                 }
                 catch ( RemoteException ignore ) {} 
             }

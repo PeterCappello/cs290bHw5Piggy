@@ -56,7 +56,7 @@ abstract public class Task implements Serializable, Callable<Return>
     
     public Shared shared() { return computerImpl.shared(); }
     
-    public void shared( Shared shared ) { computerImpl.upShared( shared ); }
+    public void shared( Shared shared ) { computerImpl.shared( shared ); }
     
     public boolean isSpaceCallable() { return this instanceof TaskCompose; }
 }

@@ -24,7 +24,6 @@
 package api;
 
 import system.Task;
-import system.Return;
 import java.rmi.Remote;
 import java.rmi.RemoteException;
 import java.util.List;
@@ -84,6 +83,4 @@ public interface Space extends Remote
      * @throws RemoteException
      */
     ReturnValue take() throws RemoteException;  
-    
-    void upShared( Shared shared ) throws RemoteException;
 }

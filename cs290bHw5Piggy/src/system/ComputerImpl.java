@@ -26,8 +26,6 @@ import api.*;
 import java.rmi.Naming;
 import java.rmi.RemoteException;
 import java.rmi.server.UnicastRemoteObject;
-import java.util.concurrent.BlockingQueue;
-import java.util.concurrent.LinkedBlockingQueue;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -37,8 +35,6 @@ import java.util.logging.Logger;
  */
 public class ComputerImpl extends UnicastRemoteObject implements Computer
 {
-    final private SpaceProxy spaceProxy;
-    //!! delete sharedLock & test to ensure its OK.
     final private Boolean sharedLock = true;
           private Shared shared;
            
@@ -46,22 +42,31 @@ public class ComputerImpl extends UnicastRemoteObject implements Computer
     {
         Logger.getLogger( this.getClass().getCanonicalName() )
               .log(Level.INFO, "Computer: started with {0} available processors.", Runtime.getRuntime().availableProcessors() );
-        spaceProxy = new SpaceProxy( space );
-        spaceProxy.start();
     }
          
     /**
      * Execute a Task.
      * @param task to be executed.
+     * @param shared the best effort value of shared.
      * @return the return value of the Task call method.
      * @throws RemoteException
      */
     @Override
-    public Return execute( Task task ) throws RemoteException 
+    public Return execute( Task task, Shared shared ) throws RemoteException 
     { 
         final long startTime = System.nanoTime();
+        if ( this.shared == null )
+        {
+            this.shared = shared;
+        }
+        else
+        {
+            this.shared.shared( shared );
+        }
         task.computer( this );
+        task.shared( shared );
         final Return returnValue = task.call();
+        returnValue.shared( shared );
         final long runTime = ( System.nanoTime() - startTime ); // milliseconds
         returnValue.taskRunTime( runTime );       
         return returnValue;
@@ -78,49 +83,5 @@ public class ComputerImpl extends UnicastRemoteObject implements Computer
         
     public Shared shared() { synchronized ( sharedLock ) { return shared; } }
     
-    public void upShared( Shared that )
-    {
-        if ( shared.shared( that ) )
-        {
-            spaceProxy.upShared();
-        }
-    }
-    
-    @Override
-    public void downShared( Shared that ) 
-    { 
-        if ( shared == null )
-        {
-            shared = that;
-        }
-        else
-        {
-            shared.shared( that ); 
-        }
-    }
-    
-    private class SpaceProxy extends Thread
-    {
-        final private Space space;
-        final private BlockingQueue<Boolean> upSharedQ = new LinkedBlockingQueue<>(); 
-        
-        SpaceProxy( Space space ) { this.space = space; }
-        
-        @Override
-        public void run()
-        {
-            try { upSharedQ.take(); } 
-            catch (InterruptedException ex) 
-            {
-                Logger.getLogger(ComputerImpl.class.getName()).log(Level.SEVERE, null, ex);
-            }
-            try { space.upShared( shared.duplicate() ); } 
-            catch ( RemoteException ex ) 
-            {
-                Logger.getLogger( ComputerImpl.class.getName() ).log( Level.SEVERE, null, ex );
-            }
-        }
-        
-        synchronized private void upShared() { upSharedQ.add( Boolean.TRUE ); }
-    }
+    public void shared( Shared shared ) { synchronized ( sharedLock ) { this.shared.shared( shared ); } }
 }
