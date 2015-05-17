@@ -152,6 +152,7 @@ public class TaskEuclideanTsp extends TaskRecursive<Tour>
                 } 
             }  
         } 
+        shared( new SharedTour( shortestTour, shortestTourCost ) );
         return new ReturnValueTour( this, new Tour( shortestTour, shortestTourCost ) );
     }
 
