@@ -40,7 +40,7 @@ public class ComputerImpl extends UnicastRemoteObject implements Computer
            
     public ComputerImpl( Space space ) throws RemoteException
     {
-        Logger.getLogger( this.getClass().getCanonicalName() )
+        Logger.getLogger( getClass().getCanonicalName() )
               .log(Level.INFO, "Computer: started with {0} available processors.", Runtime.getRuntime().availableProcessors() );
     }
          

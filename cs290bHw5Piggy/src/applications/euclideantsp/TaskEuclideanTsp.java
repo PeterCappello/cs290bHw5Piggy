@@ -107,7 +107,6 @@ public class TaskEuclideanTsp extends TaskRecursive<Tour>
         partialTour = new ArrayList<>( parentTask.partialTour );
         lowerBound = parentTask.lowerBound.make( parentTask, newCity );
         unvisitedCities = new LinkedList<>( parentTask.unvisitedCities ); 
-        
         partialTour.add( newCity );
         unvisitedCities.remove( newCity );
         if ( newCity.equals( ONE ) )

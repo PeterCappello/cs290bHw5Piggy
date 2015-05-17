@@ -66,7 +66,7 @@ final public class LowerBoundNearestNeighbors implements LowerBound
         this.lowerBound = lowerBound;
     }
     
-    public double initializeLowerBound()
+    private double initializeLowerBound()
     {
         double bound = 0.0;
         for ( int city = 0; city < CITIES.length; city++ )
