@@ -53,14 +53,14 @@ public interface Space extends Remote
      */
     ReturnValue compute( final Task task ) throws RemoteException;
     
-    ReturnValue compute( Task task, Shared shared ) throws RemoteException;
-    
     /**
      *
-     * @param task
+     * @param task to be computed.
+     * @param shared the shared object.
+     * @return the task's execute method return value.
      * @throws RemoteException
      */
-    void execute( final Task task ) throws RemoteException;
+    ReturnValue compute( Task task, Shared shared ) throws RemoteException;
     
     /**
      *

@@ -35,7 +35,7 @@ import static util.EuclideanGraph.distance;
  * Generate pseudorandom Euclidean graphs.
  * @author Peter Cappello
  */
-public class EuclideanGraph 
+public final class EuclideanGraph 
 {
     static final private int X = 0;
     static final private int Y = 1;
@@ -46,7 +46,7 @@ public class EuclideanGraph
      * @param seed
      * @return
      */
-    public static double[][] generateRandomGraph( int numVertices, long seed )
+    public static double[][] generateRandomGraph( final int numVertices, final long seed )
     {
         double[][] vertices = new double[ numVertices ][ 2 ];
         Random random = new Random( seed );
@@ -58,7 +58,7 @@ public class EuclideanGraph
         return vertices;
     }
     
-    public static List<Integer> greedyTour( double[][] cities )
+    public static List<Integer> greedyTour( final double[][] cities )
     {
         List<Integer> tour = new LinkedList<>();
         List<Integer> unvisitedCities = new ArrayList<>();

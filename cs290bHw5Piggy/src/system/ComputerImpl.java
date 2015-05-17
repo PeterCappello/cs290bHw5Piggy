@@ -33,12 +33,12 @@ import java.util.logging.Logger;
  * An implementation of the Remote Computer interface.
  * @author Peter Cappello
  */
-public class ComputerImpl extends UnicastRemoteObject implements Computer
+public final class ComputerImpl extends UnicastRemoteObject implements Computer
 {
     final private Boolean sharedLock = true;
           private Shared shared;
            
-    public ComputerImpl( Space space ) throws RemoteException
+    public ComputerImpl( final Space space ) throws RemoteException
     {
         Logger.getLogger( getClass().getCanonicalName() )
               .log(Level.INFO, "Computer: started with {0} available processors.", Runtime.getRuntime().availableProcessors() );
@@ -52,7 +52,7 @@ public class ComputerImpl extends UnicastRemoteObject implements Computer
      * @throws RemoteException
      */
     @Override
-    public Return execute( Task task, Shared shared ) throws RemoteException 
+    public Return execute( final Task task, final Shared shared ) throws RemoteException 
     { 
         final long startTime = System.nanoTime();
         this.shared = newerShared( shared );
@@ -65,7 +65,12 @@ public class ComputerImpl extends UnicastRemoteObject implements Computer
         return returnValue;
     }
     
-    public static void main( String[] args ) throws Exception
+    /**
+     *
+     * @param args [0] domain name of Space; localhost, if unspecified.
+     * @throws Exception
+     */
+    public static void main( final String[] args ) throws Exception
     {
         System.setSecurityManager( new SecurityManager() );
         final String domainName = args.length == 0 ? "localhost" : args[ 0 ];
@@ -74,7 +79,7 @@ public class ComputerImpl extends UnicastRemoteObject implements Computer
         space.register( new ComputerImpl( space ), Runtime.getRuntime().availableProcessors() );
     }
             
-    private Shared newerShared( Shared that )
+    private Shared newerShared( final Shared that )
     {
         synchronized( sharedLock )
         {

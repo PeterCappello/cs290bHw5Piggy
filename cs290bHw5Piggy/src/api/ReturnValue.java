@@ -59,8 +59,8 @@ abstract public class ReturnValue<T> extends Return
     {
         if ( associatedTask instanceof TaskCompose )
         {
-            TaskCompose task = (TaskCompose) associatedTask;
-            long commonTime = task.decomposeTaskRunTime() + taskRunTime();
+            final TaskCompose task = (TaskCompose) associatedTask;
+            final long commonTime = task.decomposeTaskRunTime() + taskRunTime();
             t1(   commonTime + task.sumChildT1() );
             tInf( commonTime + task.maxChildTInf() );
         }
@@ -75,7 +75,7 @@ abstract public class ReturnValue<T> extends Return
             space.putResult( this );
             return;
         }
-        TaskCompose taskCompose = space.getCompose( composeId );
+        final TaskCompose taskCompose = space.getCompose( composeId );
         assert taskCompose != null;
         taskCompose.arg( composeArgNum, value, space );
         taskCompose.sumChildT1( t1() );

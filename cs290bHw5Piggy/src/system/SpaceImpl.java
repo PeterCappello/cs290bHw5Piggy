@@ -107,12 +107,12 @@ public final class SpaceImpl extends UnicastRemoteObject implements Space
         reportTimeMeasures( result );
         return result;
     }
+    
     /**
      * Put a task into the Task queue.
      * @param task
      */
-    @Override
-    public void execute( Task task ) 
+    private void execute( Task task ) 
     { 
         task.id( makeTaskId() );
         task.composeId( FINAL_RETURN_VALUE );
@@ -164,14 +164,19 @@ public final class SpaceImpl extends UnicastRemoteObject implements Space
               .log( Level.INFO, "Registered computer {0}.", computerProxy.computerId );    
     }
     
-    public static void main( String[] args ) throws Exception
+    /**
+     *
+     * @param args unused.
+     * @throws Exception
+     */
+    public static void main( final String[] args ) throws Exception
     {
         System.setSecurityManager( new SecurityManager() );
         LocateRegistry.createRegistry( Space.PORT )
                       .rebind(Space.SERVICE_NAME, new SpaceImpl() );
     }
 
-    synchronized public void processResult( Task parentTask, Return result )
+    synchronized public void processResult( final Task parentTask, final Return result )
     { 
         numTasks.getAndIncrement();
         result.process( parentTask, this );
@@ -179,7 +184,7 @@ public final class SpaceImpl extends UnicastRemoteObject implements Space
         t1 += result.taskRunTime();
     }
     
-    private Shared newerShared( Shared that )
+    private Shared newerShared( final Shared that )
     {
         synchronized ( sharedLock )
         {
@@ -189,30 +194,30 @@ public final class SpaceImpl extends UnicastRemoteObject implements Space
     
     public int makeTaskId() { return taskIds.incrementAndGet(); }
     
-    public TaskCompose getCompose( int composeId ) { return waitingTaskMap.get( composeId ); }
+    public TaskCompose getCompose( final int composeId ) { return waitingTaskMap.get( composeId ); }
             
-    public void putCompose( TaskCompose compose )
+    public void putCompose( final TaskCompose compose )
     {
         assert waitingTaskMap.get( compose.id() ) == null; 
         waitingTaskMap.put( compose.id(), compose );
         assert waitingTaskMap.get( compose.id() ) != null;
     }
     
-    public void putReadyTask( Task task ) 
+    public void putReadyTask( final Task task ) 
     { 
         assert waitingTaskMap.get( task.composeId() ) != null || task.composeId() == FINAL_RETURN_VALUE : task.composeId();
         readyTaskQ.add( task ); 
     }
     
-    public void removeWaitingTask( int composeId )
+    public void removeWaitingTask( final int composeId )
     { 
         assert waitingTaskMap.get( composeId ) != null; 
         waitingTaskMap.remove( composeId ); 
     }
     
-    public void putResult( ReturnValue result ) { resultQ.add( result ); }
+    public void putResult( final ReturnValue result ) { resultQ.add( result ); }
     
-    public void tInf( long tInf ) { this.tInf = tInf; }
+    public void tInf( final long tInf ) { this.tInf = tInf; }
     
     private void initTimeMeasures()
     {
@@ -221,7 +226,7 @@ public final class SpaceImpl extends UnicastRemoteObject implements Space
         tInf = 0;
     }
     
-    private void reportTimeMeasures( Return result )
+    private void reportTimeMeasures( final Return result )
     {
         Logger.getLogger( getClass().getCanonicalName() )
               .log( Level.INFO, 
@@ -235,7 +240,7 @@ public final class SpaceImpl extends UnicastRemoteObject implements Space
         final private int computerId = computerIds.getAndIncrement();
         final private Map<Integer, WorkerProxy> workerMap = new HashMap<>();
 
-        ComputerProxy( Computer computer, int numWorkerProxies )
+        ComputerProxy( final Computer computer, final int numWorkerProxies )
         { 
             this.computer = computer;
             for ( int id = 0; id < numWorkerProxies; id++ )
@@ -253,7 +258,7 @@ public final class SpaceImpl extends UnicastRemoteObject implements Space
             }
         }
         
-        private void unregister( Task task, Computer computer, int workerProxyId )
+        private void unregister( final Task task, final Computer computer, final int workerProxyId )
         {
             readyTaskQ.add( task );
             workerMap.remove( workerProxyId );
@@ -271,7 +276,7 @@ public final class SpaceImpl extends UnicastRemoteObject implements Space
         {
             final private Integer id;
             
-            private WorkerProxy( int id ) { this.id = id; }
+            private WorkerProxy( final int id ) { this.id = id; }
             
             @Override
             public void run()

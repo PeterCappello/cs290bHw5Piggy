@@ -40,20 +40,20 @@ abstract public class Return implements Serializable
     private Shared shared;
     
     public Shared shared() { return shared; }
-    public void shared( Shared shared ) { this.shared = shared; }
+    public void shared( final Shared shared ) { this.shared = shared; }
     public long taskRunTime() { return taskRunTime; }
-    public void taskRunTime( long taskRunTime ) { this.taskRunTime = taskRunTime; }
+    public void taskRunTime( final long taskRunTime ) { this.taskRunTime = taskRunTime; }
     public long t1() { return t1; }
-    public void t1( long t1 ) { this.t1 = t1; }
+    public void t1( final long t1 ) { this.t1 = t1; }
     public long tInf() { return tInf; }
-    public void tInf( long tInf ) { this.tInf = tInf; }
+    public void tInf( final long tInf ) { this.tInf = tInf; }
         
     /**
      *
      * @param task the task whose Result is to be processed.
      * @param space the receiving the Temp objects.
      */
-    abstract public void process( Task task, SpaceImpl space );
+    abstract public void process( final Task task, final SpaceImpl space );
     
     @Override
     public String toString()

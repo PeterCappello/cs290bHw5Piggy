@@ -45,18 +45,18 @@ abstract public class Task implements Serializable, Callable<Return>
     abstract public Return call(); 
         
     public int  id() { return id; }
-    public void id( int id ) { this.id = id; }
+    public void id( final int id ) { this.id = id; }
     
     public int  composeArgNum() { return composeArgNum; }
-    public void composeArgNum( int composeArgNum ) { this.composeArgNum = composeArgNum; }
+    public void composeArgNum( final int composeArgNum ) { this.composeArgNum = composeArgNum; }
     
     public int  composeId() { return composeId; }
-    public void composeId( int composeId ) { this.composeId = composeId; }
+    public void composeId( final int composeId ) { this.composeId = composeId; }
         
     public Shared shared() { return shared; }
-    public void   shared( Shared shared ) { this.shared = newerShared( shared ); }
+    public void   shared( final Shared shared ) { this.shared = newerShared( shared ); }
     
-    private Shared newerShared( Shared that )
+    private Shared newerShared( final Shared that )
     {
         synchronized( sharedLock )
         {

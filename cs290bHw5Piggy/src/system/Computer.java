@@ -33,5 +33,13 @@ import java.rmi.RemoteException;
  */
 public interface Computer extends Remote
 {        
-    public Return execute( Task task, Shared shared ) throws RemoteException; 
+
+    /**
+     * Execute Task with access to Shared object.
+     * @param task
+     * @param shared
+     * @return the Task return value.
+     * @throws RemoteException
+     */
+    public Return execute( final Task task, final Shared shared ) throws RemoteException; 
 }
