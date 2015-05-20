@@ -60,7 +60,7 @@ public class TaskEuclideanTsp extends TaskRecursive<Tour>
 	{ 3, 6 },
 	{ 4, 4 },
 	{ 5, 4 },
-//	{ 5, 5 },
+	{ 5, 5 },
 	{ 4, 5 }
     };
     static final private String FRAME_TITLE = "Euclidean TSP";
@@ -166,6 +166,10 @@ public class TaskEuclideanTsp extends TaskRecursive<Tour>
             {
                 children.add( child );
             }
+            else
+            {
+                // update prune statistics
+            }
         }
         return new ReturnDecomposition( new MinTour(), children );
     }
@@ -186,6 +190,10 @@ public class TaskEuclideanTsp extends TaskRecursive<Tour>
             if ( ! child.pruneMe && child.lowerBound().cost() < upperBound )
             {
                     children.add( child );
+            }
+            else
+            {
+                // update prune statistics
             }
         }
         return children;
