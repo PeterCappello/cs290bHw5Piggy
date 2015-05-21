@@ -55,13 +55,11 @@ public final class ComputerImpl extends UnicastRemoteObject implements Computer
     public Return execute( final Task task, final Shared shared ) throws RemoteException 
     { 
         final long startTime = System.nanoTime();
-        this.shared = newerShared( shared );
-        final Return returnValue = task.shared( this.shared )
-                                       .call();
-        this.shared = newerShared( task.shared() );
-        return returnValue.setIds( task )
-                          .shared( this.shared )
-                          .taskRunTime( System.nanoTime() - startTime );
+        return task.shared( upadateShared( shared ) )
+                   .call()
+                   .setIds( task )
+                   .shared( upadateShared( task.shared() ) )
+                   .taskRunTime( System.nanoTime() - startTime );
     }
     
     /**
@@ -78,11 +76,12 @@ public final class ComputerImpl extends UnicastRemoteObject implements Computer
         space.register( new ComputerImpl( space ), Runtime.getRuntime().availableProcessors() );
     }
             
-    private Shared newerShared( final Shared that )
+    private Shared upadateShared( final Shared that )
     {
         synchronized( sharedLock )
         {
-            return this.shared == null || this.shared.isOlderThan( that ) ? that : this.shared;
+            this.shared = this.shared == null || this.shared.isOlderThan( that ) ? that : this.shared;
+            return this.shared;
         }
     }
 }
