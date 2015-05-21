@@ -55,7 +55,11 @@ abstract public class Task implements Serializable, Callable<Return>
     public void composeId( final UUID composeId ) { this.composeId = composeId; }
         
     public Shared shared() { return shared; }
-    public void   shared( final Shared shared ) { this.shared = newerShared( shared ); }
+    public Task   shared( final Shared shared ) 
+    { 
+        this.shared = newerShared( shared ); 
+        return this;
+    }
     
     private Shared newerShared( final Shared that )
     {

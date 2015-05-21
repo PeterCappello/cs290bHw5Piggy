@@ -56,8 +56,8 @@ public final class ComputerImpl extends UnicastRemoteObject implements Computer
     { 
         final long startTime = System.nanoTime();
         this.shared = newerShared( shared );
-        task.shared( this.shared );
-        final Return returnValue = task.call();
+        final Return returnValue = task.shared( this.shared )
+                                       .call();
         this.shared = newerShared( task.shared() );
         return returnValue.setIds( task )
                           .shared( this.shared )
