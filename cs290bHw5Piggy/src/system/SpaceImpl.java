@@ -61,7 +61,7 @@ public final class SpaceImpl extends UnicastRemoteObject implements Space
     final private ComputerImpl computerInternal;
     final private Boolean sharedLock = true;
           private UUID rootTaskReturnValue;
-          private Shared shared; // !! make immutable.
+          private Shared shared;
           private long t1   = 0;
           private long tInf = 0;
     
@@ -123,13 +123,7 @@ public final class SpaceImpl extends UnicastRemoteObject implements Space
     }
     
     @Override
-    synchronized public void putAll( final List<Task> taskList )
-    {
-        for ( Task task : taskList )
-        {
-            readyTaskQ.add( task );
-        }
-    }
+    synchronized public void putAll( final List<Task> taskList ) { readyTaskQ.addAll( taskList ); }
 
     /**
      * Take a Return from the Return queue.
