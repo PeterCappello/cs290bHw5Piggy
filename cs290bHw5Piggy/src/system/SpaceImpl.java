@@ -67,12 +67,12 @@ public final class SpaceImpl extends UnicastRemoteObject implements Space
     
     public SpaceImpl() throws RemoteException 
     {
-        Logger.getLogger( getClass().getName() )
-              .log( Level.INFO, "Space started." );
         if ( SPACE_CALLABLE )
         {
             computerInternal = new ComputerImpl( this );
         }
+        Logger.getLogger( getClass().getName() )
+              .log( Level.INFO, "Space started." );
     }
     
     public Computer computer() { return computerInternal; }
