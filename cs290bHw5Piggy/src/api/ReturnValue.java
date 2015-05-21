@@ -23,6 +23,7 @@
  */
 package api;
 
+import java.util.UUID;
 import javax.swing.JLabel;
 import system.Task;
 import system.Return;
@@ -35,7 +36,7 @@ import system.SpaceImpl;
  */
 abstract public class ReturnValue<T> extends Return
 {    
-    final private int composeId;
+    final private UUID composeId;
     final private int composeArgNum;
     final private T value;
     
@@ -48,7 +49,7 @@ abstract public class ReturnValue<T> extends Return
     }
     
     public T value() { return value; }
-   
+    
     /**
      * Update the taskCompose task that is waiting for this input.
      * @param associatedTask unused - the task whose Result is to be processed.
@@ -69,7 +70,7 @@ abstract public class ReturnValue<T> extends Return
             t1(   taskRunTime() );
             tInf( taskRunTime() );
         }
-        if ( composeId == SpaceImpl.FINAL_RETURN_VALUE )
+        if ( composeId.equals( space.rootTaskReturnValue() ) )
         {
             space.tInf( tInf() );
             space.putResult( this );

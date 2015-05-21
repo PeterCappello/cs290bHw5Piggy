@@ -23,6 +23,7 @@
  */
 package api;
 
+import applications.euclideantsp.Tour;
 import system.Task;
 import java.awt.BorderLayout;
 import java.awt.Container;
@@ -123,5 +124,10 @@ public class JobRunner<T> extends JFrame
         container.add( new JScrollPane( jLabel ), BorderLayout.CENTER );
         pack();
         setVisible( true );
+    }
+    
+    private void handleEvent( Tour tour )
+    {
+        
     }
 }

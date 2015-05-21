@@ -34,6 +34,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
@@ -55,10 +56,11 @@ public final class SpaceImpl extends UnicastRemoteObject implements Space
     final private BlockingQueue<Task>     readyTaskQ = new LinkedBlockingQueue<>();
     final private BlockingQueue<ReturnValue> resultQ = new LinkedBlockingQueue<>();
     final private Map<Computer, ComputerProxy> computerProxies = Collections.synchronizedMap( new HashMap<>() );
-    final private Map<Integer, TaskCompose>    waitingTaskMap  = Collections.synchronizedMap( new HashMap<>() );
+    final private Map<UUID, TaskCompose>        waitingTaskMap = Collections.synchronizedMap( new HashMap<>() );
     final private AtomicInteger numTasks = new AtomicInteger();
     final private ComputerImpl computerInternal;
     final private Boolean sharedLock = true;
+          private UUID rootTaskReturnValue;
           private Shared shared; // !! make immutable.
           private long t1   = 0;
           private long tInf = 0;
@@ -93,16 +95,16 @@ public final class SpaceImpl extends UnicastRemoteObject implements Space
     
     /**
      *
-     * @param task
+     * @param rootTask
      * @param shared
      * @return
      */
     @Override
-    public ReturnValue compute( Task task, Shared shared )
+    public ReturnValue compute( Task rootTask, Shared shared )
     {
         initTimeMeasures();
         this.shared = shared;
-        execute( task );
+        execute( rootTask );
         ReturnValue result = take();
         reportTimeMeasures( result );
         return result;
@@ -112,11 +114,12 @@ public final class SpaceImpl extends UnicastRemoteObject implements Space
      * Put a task into the Task queue.
      * @param task
      */
-    private void execute( Task task ) 
+    private void execute( Task rootTask ) 
     { 
-        task.id( makeTaskId() );
-        task.composeId( FINAL_RETURN_VALUE );
-        readyTaskQ.add( task );
+        rootTask.id( UUID.randomUUID() );
+        rootTaskReturnValue = UUID.randomUUID();
+        rootTask.composeId( rootTaskReturnValue );
+        readyTaskQ.add( rootTask );
     }
     
     @Override
@@ -194,22 +197,28 @@ public final class SpaceImpl extends UnicastRemoteObject implements Space
     
     public int makeTaskId() { return taskIds.incrementAndGet(); }
     
-    public TaskCompose getCompose( final int composeId ) { return waitingTaskMap.get( composeId ); }
+    public TaskCompose getCompose( final UUID composeId ) { return waitingTaskMap.get( composeId ); }
             
     public void putCompose( final TaskCompose compose )
     {
-        assert waitingTaskMap.get( compose.id() ) == null; 
+        assert waitingTaskMap.get( compose.id() ) == null : compose.id(); 
         waitingTaskMap.put( compose.id(), compose );
         assert waitingTaskMap.get( compose.id() ) != null;
     }
     
     public void putReadyTask( final Task task ) 
     { 
-        assert waitingTaskMap.get( task.composeId() ) != null || task.composeId() == FINAL_RETURN_VALUE : task.composeId();
+        assert waitingTaskMap.get( task.composeId() ) != null || task.composeId() == rootTaskReturnValue : task.composeId();
         readyTaskQ.add( task ); 
     }
     
-    public void removeWaitingTask( final int composeId )
+    public void putReadyTasks( final List<Task> tasks ) 
+    { 
+//        assert waitingTaskMap.get( task.composeId() ) != null || task.composeId() == rootTaskReturnValue : task.composeId();
+        readyTaskQ.addAll( tasks ); 
+    }
+    
+    public void removeWaitingTask( final UUID composeId )
     { 
         assert waitingTaskMap.get( composeId ) != null; 
         waitingTaskMap.remove( composeId ); 
@@ -225,6 +234,8 @@ public final class SpaceImpl extends UnicastRemoteObject implements Space
         t1 = 0;
         tInf = 0;
     }
+    
+    public UUID rootTaskReturnValue() { return rootTaskReturnValue; }
     
     private void reportTimeMeasures( final Return result )
     {

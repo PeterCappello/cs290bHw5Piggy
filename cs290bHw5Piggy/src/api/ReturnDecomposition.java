@@ -25,6 +25,7 @@ package api;
 
 import system.Task;
 import java.util.List;
+import java.util.UUID;
 import system.Return;
 import system.SpaceImpl;
 
@@ -43,28 +44,36 @@ public class ReturnDecomposition extends Return
     
     public List<Task> tasks() { return tasks; }
     
-    /**
-     *
-     * @param parentTask the task whose result is to be processed.
-     * @param space the Space that holds the Task and Results.
-     */
     @Override
-    public void process( Task parentTask, SpaceImpl space ) 
+    public Return setIds( Task parentTask )
     {
-        final int composeId = space.makeTaskId();
+        final UUID composeId = UUID.randomUUID();
         compose.id( composeId );
         compose.composeId( parentTask.composeId() );
         compose.composeArgNum( parentTask.composeArgNum() );
         compose.numArgs( tasks.size() );
-        space.putCompose( compose );
         compose.decomposeTaskRunTime( taskRunTime() );
         for ( int i = 0; i < tasks.size(); i++  )
         {
             Task task = tasks.get( i );
-            task.id( space.makeTaskId() );
+            task.id( UUID.randomUUID() );
+            assert task.id() != null;
             task.composeId( composeId );
+            assert task.composeId() != null;
             task.composeArgNum( i );
-            space.putReadyTask( task ); 
         }
+        return this;
+    }
+    
+    /**
+     *
+     * @param space the Space that holds the Task and Results.
+     */
+    @Override
+    public void process( final Task parentTask, final SpaceImpl space ) 
+    {
+        compose.decomposeTaskRunTime( taskRunTime() );
+        space.putCompose( compose );
+        space.putReadyTasks( tasks );
     }
 }

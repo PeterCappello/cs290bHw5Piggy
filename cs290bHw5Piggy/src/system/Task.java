@@ -26,6 +26,7 @@ import api.Shared;
 import api.Space;
 import api.TaskCompose;
 import java.io.Serializable;
+import java.util.UUID;
 import java.util.concurrent.Callable;
 
 /**
@@ -34,8 +35,8 @@ import java.util.concurrent.Callable;
  */
 abstract public class Task implements Serializable, Callable<Return> 
 { 
-    private int id;
-    private int composeId;
+    private UUID id;
+    private UUID composeId;
     private int composeArgNum;
     private final Boolean sharedLock = true;
     private Shared shared;
@@ -44,14 +45,14 @@ abstract public class Task implements Serializable, Callable<Return>
     @Override
     abstract public Return call(); 
         
-    public int  id() { return id; }
-    public void id( final int id ) { this.id = id; }
+    public UUID  id() { return id; }
+    public void id( final UUID id ) { this.id = id; }
     
     public int  composeArgNum() { return composeArgNum; }
     public void composeArgNum( final int composeArgNum ) { this.composeArgNum = composeArgNum; }
     
-    public int  composeId() { return composeId; }
-    public void composeId( final int composeId ) { this.composeId = composeId; }
+    public UUID  composeId() { return composeId; }
+    public void composeId( final UUID composeId ) { this.composeId = composeId; }
         
     public Shared shared() { return shared; }
     public void   shared( final Shared shared ) { this.shared = newerShared( shared ); }
