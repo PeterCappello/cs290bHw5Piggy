@@ -82,14 +82,14 @@ public final class SpaceImpl extends UnicastRemoteObject implements Space
      * To ensure that the correct Return is returned, 
      * this must be the only computation the Space is servicing.
      * 
-     * @param task
+     * @param rootTask task that encapsulates the overall computation.
      * @return the Task's Return object.
      */
     @Override
-    public ReturnValue compute( Task task )
+    public ReturnValue compute( Task rootTask )
     {
         initTimeMeasures();
-        execute( task );
+        execute( rootTask );
         return take();
     }
     
@@ -116,7 +116,7 @@ public final class SpaceImpl extends UnicastRemoteObject implements Space
      */
     private void execute( Task rootTask ) 
     { 
-        rootTask.id( UUID.randomUUID() );
+//        rootTask.id( UUID.randomUUID() );
         rootTaskReturnValue = UUID.randomUUID();
         rootTask.composeId( rootTaskReturnValue );
         readyTaskQ.add( rootTask );
@@ -175,10 +175,10 @@ public final class SpaceImpl extends UnicastRemoteObject implements Space
 
     synchronized public void processResult( final Task parentTask, final Return result )
     { 
-        numTasks.getAndIncrement();
         result.process( parentTask, this );
         shared = newerShared( result.shared() );
         t1 += result.taskRunTime();
+        numTasks.getAndIncrement();
     }
     
     private Shared newerShared( final Shared that )
@@ -206,17 +206,9 @@ public final class SpaceImpl extends UnicastRemoteObject implements Space
         readyTaskQ.add( task ); 
     }
     
-    public void putReadyTasks( final List<Task> tasks ) 
-    { 
-//        assert waitingTaskMap.get( task.composeId() ) != null || task.composeId() == rootTaskReturnValue : task.composeId();
-        readyTaskQ.addAll( tasks ); 
-    }
+    public void putReadyTasks( final List<Task> tasks ) { readyTaskQ.addAll( tasks ); }
     
-    public void removeWaitingTask( final UUID composeId )
-    { 
-        assert waitingTaskMap.get( composeId ) != null; 
-        waitingTaskMap.remove( composeId ); 
-    }
+    public void removeWaitingTask( final UUID composeId ) { waitingTaskMap.remove( composeId ); }
     
     public void putResult( final ReturnValue result ) { resultQ.add( result ); }
     
