@@ -133,11 +133,9 @@ public class TaskEuclideanTsp extends TaskRecursive<Tour>
         while ( ! stack.isEmpty() ) 
         {
             TaskEuclideanTsp currentTask = stack.pop();
-            
-            // get children with lower bound < current upper bound.
             List<TaskEuclideanTsp> children = currentTask.children( shortestTourCost );
             for ( TaskEuclideanTsp child : children )
-            { 
+            {   // child lower bound < upper bound.
                 if ( child.isComplete() )
                 { 
                     shortestTour = child.tour();
