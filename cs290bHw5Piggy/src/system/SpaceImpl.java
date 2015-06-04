@@ -206,7 +206,7 @@ public final class SpaceImpl extends UnicastRemoteObject implements Space
         readyTaskQ.add( task ); 
     }
     
-    public void putReadyTasks( final List<Task> tasks ) { readyTaskQ.addAll( tasks ); }
+    public void putReadyTasks( final List<? extends Task> tasks ) { readyTaskQ.addAll( tasks ); }
     
     public void removeWaitingTask( final UUID composeId ) { waitingTaskMap.remove( composeId ); }
     
