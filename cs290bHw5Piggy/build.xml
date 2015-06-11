@@ -70,4 +70,74 @@
     nbproject/build-impl.xml file. 
 
     -->
+    
+  <property name="src"   location="src" />
+  <property name="build" location="build" />
+  <property name="dist"  location="dist" />
+  
+  <target name="mycompile" description="compile the source" >
+    <!-- Create the build directory structure used by compile -->
+    <mkdir dir="${build}"/>  
+  
+    <!-- Compile the java code from ${src} into ${build} -->
+    <javac includeantruntime="false" srcdir="${src}" destdir="${build}"/>
+  </target>
+
+  <target name="mydist" depends="mycompile" description="generate the distribution" >
+    <!-- Create the distribution directory -->
+    <mkdir dir="${dist}"/>
+
+    <!-- Make jar file -->
+    <jar jarfile="${dist}/classes.jar" basedir="${build}" includes="api/** applications/** system/** util/**"/>
+
+  </target>
+  
+  <target name="myjavadoc" depends="mycompile" description="create javadocs">
+  	<javadoc packagenames="applications.*,api.*" sourcepath="${src}" destdir="documents/javadoc" />
+  </target>
+  
+  <target name="runSpace" depends="mydist" description="run computer" >
+  	<java classname="system.SpaceImpl" fork="true">
+  	  <jvmarg value="-Djava.security.policy=policy"/>
+  	  <classpath>
+  	    <pathelement location="dist/classes.jar"/>
+  	  </classpath>
+  	</java>
+  </target> 
+  
+  <target name="runComputer" depends="mydist" description="run computer" >
+  	<java classname="system.ComputerImpl" fork="true">
+  	  <jvmarg value="-Djava.security.policy=policy"/>
+  	  <classpath>
+  	    <pathelement location="dist/classes.jar"/>
+  	  </classpath>
+  	</java>
+  </target>  
+  
+  <target name="runJobMandelbrotSet" depends="mydist" description="run client" >
+  	<java classname="applications.mandelbrotset.JobMandelbrotSet" fork="true">
+  	  <jvmarg value="-Djava.security.policy=policy"/>
+  	  <arg value="localhost"/>
+  	  <classpath>
+  	    <pathelement location="dist/classes.jar"/>
+  	  </classpath>
+  	</java>
+  </target>
+  
+  <target name="runJobEuclideanTsp" depends="mydist" description="run client" >
+  	<java classname="applications.euclideantsp.JobEuclideanTsp" fork="true">
+  	  <jvmarg value="-Djava.security.policy=policy"/>
+  	  <arg value="localhost"/>
+  	  <classpath>
+  	    <pathelement location="dist/classes.jar"/>
+  	  </classpath>
+  	</java>
+  </target>
+
+  <target name="myclean" description="clean up" >
+    <!-- Delete the ${build} and ${dist} directory trees -->
+    <delete dir="${client_file_codebase}/tasks"/>
+    <delete dir="${build}"/>
+    <delete dir="${dist}"/>
+  </target>
 </project>
