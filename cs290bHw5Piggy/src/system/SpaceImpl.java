@@ -23,6 +23,7 @@
  */
 package system;
 
+import api.NullShared;
 import api.ReturnValue;
 import api.Shared;
 import api.Space;
@@ -61,7 +62,7 @@ public final class SpaceImpl extends UnicastRemoteObject implements Space
     final private ComputerImpl computerInternal;
     final private Boolean sharedLock = true;
           private UUID rootTaskReturnValue;
-          private Shared shared;
+          private Shared shared = new NullShared();
           private long t1   = 0;
           private long tInf = 0;
     
