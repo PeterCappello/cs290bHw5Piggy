@@ -35,6 +35,7 @@ public class MinTour extends TaskCompose<Tour>
     @Override
     public ReturnValue call() 
     {
+        assert args().get( 0 ) != null;
         Tour shortestTour = args().remove( 0 );
         for ( Tour tour : args() ) 
         {
