@@ -57,10 +57,9 @@ public class ReturnDecomposition extends Return
         {
             Task task = tasks.get( i );
             task.id( UUID.randomUUID() );
-            assert task.id() != null;
             task.composeId( composeId );
-            assert task.composeId() != null;
             task.composeArgNum( i );
+            assert task.id() != null && task.composeId() != null;
         }
         return this;
     }

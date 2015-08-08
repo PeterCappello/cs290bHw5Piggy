@@ -96,8 +96,7 @@ public class JobRunner<T> extends JFrame
      */
     public void run( final Task task ) throws RemoteException
     {
-        ReturnValue<T> returnValue = space.compute( task );
-        view( returnValue.view() );
+        view( space.compute( task ).view() );
         Logger.getLogger( this.getClass().getCanonicalName() )
               .log( Level.INFO, "Job run time: {0} ms.", ( System.nanoTime() - startTime ) / 1000000 );
     }
